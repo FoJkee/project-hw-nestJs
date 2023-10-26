@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BlogController } from './blog/blogController';
-import { BlogService } from './blog/blog.servise';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Blog, BlogSchema } from './blog/models/blog.schema';
+import { BlogModule } from './blog/blog.module';
+import { TestingModule } from './testing/testing.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot(
       'mongodb+srv://FoJkee:5455301V@cluster.eqfs4gk.mongodb.net/?retryWrites=true&w=majority',
     ),
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
+    BlogModule,
+    TestingModule,
+    PostModule,
   ],
-  controllers: [AppController, BlogController],
-  providers: [AppService, BlogService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

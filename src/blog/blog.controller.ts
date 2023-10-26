@@ -9,7 +9,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { BlogService } from './blog.servise';
+import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/blog.dto';
 import { BlogViewModels } from './models/blog.view.models';
 
