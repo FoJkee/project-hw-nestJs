@@ -35,9 +35,9 @@ export class BlogService {
       createdAt: new Date().toISOString(),
       isMembership: false,
     };
-    const result = this.BlogModel.insertMany(newBlog);
+    const result = await this.BlogModel.create(newBlog);
     if (!result) throw new BadRequestException();
-    return { ...newBlog };
+    return newBlog;
   }
 
   async deleteBlogId(blogId: string): Promise<boolean> {
@@ -51,16 +51,15 @@ export class BlogService {
   async findBlogId(blogId: string) {
     return this.BlogModel.findOne({ id: blogId }, { __v: 0, _id: 0 });
   }
-  async updateBlogId(createBlogDto: CreateBlogDto, blogId) {
-    return this.BlogModel.findOneAndUpdate(
-      { id: blogId },
-      {
-        $set: {
-          name: createBlogDto.name,
-          description: createBlogDto.description,
-          websiteUrl: createBlogDto.websiteUrl,
-        },
-      },
-    );
+  async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {
+    try {
+      await this.BlogModel.findOneAndUpdate(
+        { id: blogId },
+        { $set: createBlogDto },
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

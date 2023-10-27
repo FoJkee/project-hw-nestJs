@@ -49,7 +49,7 @@ export class BlogController {
   async updateBlogId(
     @Param('blogId') blogId: string,
     @Body() createBlogDto: CreateBlogDto,
-  ) {
+  ): Promise<boolean> {
     const blog = await this.blogService.findBlogId(blogId);
     if (!blog) throw new NotFoundException();
     return this.blogService.updateBlogId(createBlogDto, blogId);
