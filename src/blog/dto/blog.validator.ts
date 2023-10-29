@@ -12,9 +12,13 @@ export class BlogValidator implements ValidatorConstraintInterface {
   constructor(private blogService: BlogService) {}
 
   async validate(id: string) {
-    const blogData = await this.blogService.findBlogId(id);
-    if (!blogData) throw new Error();
-    return true;
+    try {
+      const blogData = await this.blogService.findBlogId(id);
+      if (!blogData) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
   defaultMessage(args: ValidationArguments) {
     return `Blog doesn't exist`;

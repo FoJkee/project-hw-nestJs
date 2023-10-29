@@ -1,32 +1,29 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Post, PostDocument } from './models/post.schema';
-import { Model } from 'mongoose';
-import { Blog, BlogDocument } from '../blog/models/blog.schema';
+import { Post } from './models/post.schema';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { CreatePostDto } from './dto/post.dto';
 import { myStatusView, PostViewModels } from './models/post.view.models';
 import { BlogService } from '../blog/blog.service';
+import { PostRepository } from './post.repository';
+import { BlogRepository } from '../blog/blog.repository';
 
 @Injectable()
 export class PostService {
   constructor(
-    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
-    @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
+    private readonly postRepository: PostRepository,
+    private readonly blogRepository: BlogRepository,
     private blogService: BlogService,
   ) {}
 
   async getPosts(): Promise<PostViewModels[]> {
-    return this.PostModel.find();
+    return this.postRepository.getPosts();
   }
 
   async createPost(
     createPostDto: CreatePostDto,
     blogId: string,
+    blogName: string,
   ): Promise<PostViewModels> {
-    const blog = await this.blogService.findBlogId(blogId);
-    const blogName = blog!.name;
-
     const newPost: Post = {
       id: randomStringGenerator(),
       title: createPostDto.title,
@@ -42,7 +39,8 @@ export class PostService {
         newestLikes: [],
       },
     };
-    const result = await this.PostModel.create(newPost);
+    const result = await this.postRepository.createPost(newPost);
+    console.log('result', result);
     if (!result) throw new BadRequestException();
     return newPost;
   }
@@ -51,27 +49,14 @@ export class PostService {
     postId: string,
     createPostDto: CreatePostDto,
   ): Promise<boolean> {
-    try {
-      await this.PostModel.findOneAndUpdate(
-        { id: postId },
-        { $set: createPostDto },
-      );
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return this.postRepository.updatePostId(postId, createPostDto);
   }
 
   async getPostId(postId: string): Promise<PostViewModels | null> {
-    return this.PostModel.findOne({ id: postId }, { __v: 0, _id: 0 });
+    return this.postRepository.getPostId(postId);
   }
 
   async deletePostId(postId: string): Promise<boolean> {
-    try {
-      await this.PostModel.findOneAndDelete({ id: postId });
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return this.postRepository.deletePostId(postId);
   }
 }

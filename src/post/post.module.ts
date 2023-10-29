@@ -5,6 +5,8 @@ import { PostService } from './post.service';
 import { PostController } from './post.controller';
 import { Blog, BlogSchema } from '../blog/models/blog.schema';
 import { BlogService } from '../blog/blog.service';
+import { BlogRepository } from '../blog/blog.repository';
+import { PostRepository } from './post.repository';
 
 @Module({
   imports: [
@@ -12,6 +14,6 @@ import { BlogService } from '../blog/blog.service';
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
   ],
   controllers: [PostController],
-  providers: [PostService, BlogService],
+  providers: [PostService, BlogService, BlogRepository, PostRepository],
 })
 export class PostModule {}

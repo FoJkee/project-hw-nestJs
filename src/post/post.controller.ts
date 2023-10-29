@@ -30,7 +30,13 @@ export class PostController {
   async createPost(
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels> {
-    return this.postService.createPost(createPostDto, createPostDto.blogId);
+    const blog = await this.blogService.findBlogId(createPostDto.blogId);
+    if (!blog) throw new NotFoundException();
+    return this.postService.createPost(
+      createPostDto,
+      createPostDto.blogId,
+      blog.name,
+    );
   }
 
   @Get(':postId')

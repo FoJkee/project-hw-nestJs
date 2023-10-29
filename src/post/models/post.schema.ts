@@ -30,7 +30,7 @@ export const extendedLikesInfoSchema =
 export type PostDocument = HydratedDocument<Post>;
 @Schema()
 export class Post {
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({ required: true, type: String })
   id: string;
   @Prop({ required: true, type: String })
   title: string;
@@ -38,7 +38,7 @@ export class Post {
   shortDescription: string;
   @Prop({ required: true, type: String })
   content: string;
-  @Prop({ required: true, unique: true, type: String })
+  @Prop({ required: true, type: String })
   blogId: string;
   @Prop({ required: true, type: String })
   blogName: string;

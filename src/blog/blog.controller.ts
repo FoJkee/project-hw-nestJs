@@ -12,10 +12,16 @@ import {
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/blog.dto';
 import { BlogViewModels } from './models/blog.view.models';
+import { PostViewModels } from '../post/models/post.view.models';
+import { PostService } from '../post/post.service';
+import { CreatePostDto } from '../post/dto/post.dto';
 
 @Controller('blogs')
 export class BlogController {
-  constructor(protected blogService: BlogService) {}
+  constructor(
+    private blogService: BlogService,
+    private postService: PostService,
+  ) {}
 
   @Get()
   async getBlogs() // @Query() blogQueryDto: BlogQueryDto,
@@ -27,15 +33,24 @@ export class BlogController {
   @HttpCode(201)
   async createBlog(
     @Body() createBlogDto: CreateBlogDto,
-  ): Promise<BlogViewModels> {
+  ): Promise<BlogViewModels | boolean> {
     return this.blogService.createBlog(createBlogDto);
   }
 
-  @Get('/:blogId/posts')
+  @Get(':blogId/posts')
   findPostForBlog() {}
 
-  @Post('/:blogId/posts')
-  createPostForBlog() {}
+  @Post(':blogId/posts')
+  @HttpCode(201)
+  async createPostForBlog(
+    @Param('blogId') blogId: string,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostViewModels> {
+    const blog = await this.blogService.findBlogId(blogId);
+    console.log('blog', blog);
+    if (!blog) throw new NotFoundException();
+    return this.postService.createPost(createPostDto, blog.id, blog.name);
+  }
 
   @Get(':blogId')
   async findBlogId(@Param('blogId') blogId: string) {
