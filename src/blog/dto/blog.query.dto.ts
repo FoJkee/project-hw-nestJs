@@ -3,13 +3,13 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class BlogQueryDto {
   @IsString()
   @IsOptional()
-  searchNameTerm: string | null = '';
+  searchNameTerm: string = '';
   @IsString()
   @IsOptional()
-  sortBy: string = 'desc';
+  sortBy: string = 'createAt';
   @IsString()
   @IsOptional()
-  sortDirection: string | null = 'createdAt';
+  sortDirection: string = 'desc';
   @IsNumber()
   @IsOptional()
   pageNumber: number = 1;
@@ -18,10 +18,17 @@ export class BlogQueryDto {
   pageSize: number = 10;
 }
 
-// export const paginationQueries = () => {
-//     let pageNumber = query.pageNumber ? +req.query.pageNumber : 1
-//     let pageSize = req.query.pageSize ? +req.query.pageSize : 10
-//     let sortBy = req.query.sortBy ? req.query.sortBy.toString() : 'createdAt'
-//     let sortDirection = req.query.sortDirection && req.query.sortDirection.toString() === 'asc' ? 'asc' : 'desc'
-//
-//     return { pageNumber, pageSize, sortBy, sortDirection }
+export class QueryDto {
+  @IsString()
+  @IsOptional()
+  sortBy: string = 'createdAt';
+  @IsString()
+  @IsOptional()
+  sortDirection: string = 'desc';
+  @IsNumber()
+  @IsOptional()
+  pageNumber: number = 1;
+  @IsNumber()
+  @IsOptional()
+  pageSize: number = 10;
+}

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Post, PostDocument } from './models/post.schema';
+import { Post, PostDocument } from '../models/post.schema';
 import { Model } from 'mongoose';
-import { Blog, BlogDocument } from '../blog/models/blog.schema';
-import { PostViewModels } from './models/post.view.models';
+import { Blog, BlogDocument } from '../../blog/models/blog.schema';
+import { PostViewModels } from '../models/post.view.models';
 import { retry } from 'rxjs';
-import { CreatePostDto } from './dto/post.dto';
+import { CreatePostDto } from '../dto/post.dto';
 
 @Injectable()
 export class PostRepository {

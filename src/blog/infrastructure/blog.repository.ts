@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from './models/blog.schema';
+import { Blog, BlogDocument } from '../models/blog.schema';
 import { Model } from 'mongoose';
-import { BlogViewModels } from './models/blog.view.models';
-import { CreateBlogDto } from './dto/blog.dto';
+import { CreateBlogDto } from '../dto/blog.dto';
 
 @Injectable()
 export class BlogRepository {
@@ -11,21 +10,20 @@ export class BlogRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
   ) {}
 
-  async getBlogs(): Promise<BlogViewModels[]> {
-    // const filter = {
-    //   name: { $regex: blogQueryDto.searchNameTerm, $options: 'i' },
-    // };
-
-    // return this.BlogModel.find(filter, { _id: 0, __v: 0 })
-    //   .sort({
-    //     [blogQueryDto.sortBy]:
-    //       blogQueryDto.sortDirection === 'asc' ? 'asc' : 'desc',
-    //   })
-    //   .skip((blogQueryDto.pageNumber - 1) * blogQueryDto.pageSize)
-    //   .limit(blogQueryDto.pageSize);
-
-    return this.BlogModel.find();
-  }
+  // async getBlogs(blogQueryDto: BlogQueryDto): Promise<BlogViewModels[]> {
+  //   const filter = {
+  //     name: { $regex: blogQueryDto.searchNameTerm, $options: 'i' },
+  //   };
+  //
+  //   return this.BlogModel.find(filter, { _id: 0, __v: 0 })
+  //     .sort({
+  //       [blogQueryDto.sortBy]:
+  //         blogQueryDto.sortDirection === 'asc' ? 'asc' : 'desc',
+  //     })
+  //     .skip((blogQueryDto.pageNumber - 1) * blogQueryDto.pageSize)
+  //     .limit(blogQueryDto.pageSize);
+  //
+  // }
 
   async createBlog(newBlog: Blog): Promise<boolean> {
     try {

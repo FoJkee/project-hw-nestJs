@@ -8,13 +8,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { CreateBlogDto } from './dto/blog.dto';
-import { BlogViewModels } from './models/blog.view.models';
-import { PostViewModels } from '../post/models/post.view.models';
-import { PostService } from '../post/post.service';
-import { CreatePostDto } from '../post/dto/post.dto';
+import { CreateBlogDto } from '../dto/blog.dto';
+import { BlogViewModels } from '../models/blog.view.models';
+import { PostViewModels } from '../../post/models/post.view.models';
+import { PostService } from '../../post/infrastructure/post.service';
+import { CreatePostDto } from '../../post/dto/post.dto';
+import { BlogQueryDto } from '../dto/blog.query.dto';
 
 @Controller('blogs')
 export class BlogController {
@@ -24,9 +26,8 @@ export class BlogController {
   ) {}
 
   @Get()
-  async getBlogs() // @Query() blogQueryDto: BlogQueryDto,
-  : Promise<BlogViewModels[]> {
-    return this.blogService.getBlogs();
+  async getBlogs(@Query() blogQueryDto: BlogQueryDto) {
+    return this.blogService.getBlogs(blogQueryDto);
   }
 
   @Post()
@@ -47,9 +48,8 @@ export class BlogController {
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels> {
     const blog = await this.blogService.findBlogId(blogId);
-    console.log('blog', blog);
     if (!blog) throw new NotFoundException();
-    return this.postService.createPost(createPostDto, blog.id, blog.name);
+    return this.postService.createPost(createPostDto, blogId, blog.name);
   }
 
   @Get(':blogId')

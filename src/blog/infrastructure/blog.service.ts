@@ -1,16 +1,24 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Blog } from './models/blog.schema';
-import { CreateBlogDto } from './dto/blog.dto';
-import { BlogViewModels } from './models/blog.view.models';
+import { Blog } from '../models/blog.schema';
+import { CreateBlogDto } from '../dto/blog.dto';
+import { BlogViewModels } from '../models/blog.view.models';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { BlogRepository } from './blog.repository';
+import { BlogQueryRepository } from './blog.query.repository';
+import { BlogQueryDto } from '../dto/blog.query.dto';
+import { PaginationView } from '../../pagination/pagination';
 
 @Injectable()
 export class BlogService {
-  constructor(private readonly blogRepository: BlogRepository) {}
+  constructor(
+    private readonly blogRepository: BlogRepository,
+    private blogQueryRepository: BlogQueryRepository,
+  ) {}
 
-  async getBlogs(): Promise<BlogViewModels[]> {
-    return this.blogRepository.getBlogs();
+  async getBlogs(
+    blogQueryDto: BlogQueryDto,
+  ): Promise<PaginationView<BlogViewModels[]>> {
+    return this.blogQueryRepository.getBlogs(blogQueryDto);
   }
 
   async createBlog(

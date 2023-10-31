@@ -8,11 +8,13 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { CreatePostDto } from './dto/post.dto';
+import { CreatePostDto } from '../dto/post.dto';
 import { PostService } from './post.service';
-import { BlogService } from '../blog/blog.service';
-import { PostViewModels } from './models/post.view.models';
+import { BlogService } from '../../blog/infrastructure/blog.service';
+import { PostViewModels } from '../models/post.view.models';
+import { QueryDto } from '../../blog/dto/blog.query.dto';
 
 @Controller('posts')
 export class PostController {
@@ -20,9 +22,10 @@ export class PostController {
     private postService: PostService,
     private blogService: BlogService,
   ) {}
+
   @Get()
-  async getPosts() {
-    return this.postService.getPosts();
+  async getPosts(@Query() queryDto: QueryDto) {
+    return this.postService.getPosts(queryDto);
   }
 
   @Post()

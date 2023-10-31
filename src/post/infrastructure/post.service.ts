@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Post } from './models/post.schema';
+import { Post } from '../models/post.schema';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { CreatePostDto } from './dto/post.dto';
-import { myStatusView, PostViewModels } from './models/post.view.models';
-import { BlogService } from '../blog/blog.service';
+import { CreatePostDto, CreatePostDtoView } from '../dto/post.dto';
+import { myStatusView, PostViewModels } from '../models/post.view.models';
+import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
-import { BlogRepository } from '../blog/blog.repository';
+import { BlogRepository } from '../../blog/infrastructure/blog.repository';
+import { QueryDto } from '../../blog/dto/blog.query.dto';
+import { PostQueryRepository } from './post.query.repository';
+import { PaginationView } from '../../pagination/pagination';
 
 @Injectable()
 export class PostService {
@@ -13,10 +16,13 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly blogRepository: BlogRepository,
     private blogService: BlogService,
+    private readonly postQueryRepository: PostQueryRepository,
   ) {}
 
-  async getPosts(): Promise<PostViewModels[]> {
-    return this.postRepository.getPosts();
+  async getPosts(
+    queryDto: QueryDto,
+  ): Promise<PaginationView<PostViewModels[]>> {
+    return this.postQueryRepository.getPosts(queryDto);
   }
 
   async createPost(
@@ -29,7 +35,7 @@ export class PostService {
       title: createPostDto.title,
       shortDescription: createPostDto.shortDescription,
       content: createPostDto.content,
-      blogId,
+      blogId: createPostDto.blogId,
       blogName,
       createdAt: new Date().toISOString(),
       extendedLikesInfo: {
