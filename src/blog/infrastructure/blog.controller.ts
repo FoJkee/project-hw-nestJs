@@ -13,10 +13,11 @@ import {
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from '../dto/blog.dto';
 import { BlogViewModels } from '../models/blog.view.models';
-import { PostViewModels } from '../../post/models/post.view.models';
+import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostService } from '../../post/infrastructure/post.service';
 import { CreatePostDto } from '../../post/dto/post.dto';
 import { BlogQueryDto } from '../dto/blog.query.dto';
+import { PostViewModels } from '../../post/models/post.view.models';
 
 @Controller('blogs')
 export class BlogController {

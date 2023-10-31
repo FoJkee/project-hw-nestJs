@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Post } from '../models/post.schema';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { CreatePostDto, CreatePostDtoView } from '../dto/post.dto';
-import { myStatusView, PostViewModels } from '../models/post.view.models';
+import { CreatePostDto } from '../dto/post.dto';
+import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
 import { BlogRepository } from '../../blog/infrastructure/blog.repository';
 import { QueryDto } from '../../blog/dto/blog.query.dto';
 import { PostQueryRepository } from './post.query.repository';
 import { PaginationView } from '../../pagination/pagination';
+import { myStatusView, PostViewModels } from '../models/post.view.models';
 
 @Injectable()
 export class PostService {
@@ -46,7 +47,6 @@ export class PostService {
       },
     };
     const result = await this.postRepository.createPost(newPost);
-    console.log('result', result);
     if (!result) throw new BadRequestException();
     return newPost;
   }
@@ -58,7 +58,7 @@ export class PostService {
     return this.postRepository.updatePostId(postId, createPostDto);
   }
 
-  async getPostId(postId: string): Promise<PostViewModels | null> {
+  async getPostId(postId: string): Promise<CommentViewModels | null> {
     return this.postRepository.getPostId(postId);
   }
 

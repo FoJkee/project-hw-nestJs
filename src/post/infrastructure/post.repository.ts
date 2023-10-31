@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../models/post.schema';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blog/models/blog.schema';
-import { PostViewModels } from '../models/post.view.models';
-import { retry } from 'rxjs';
+import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { CreatePostDto } from '../dto/post.dto';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class PostRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
   ) {}
 
-  async getPosts(): Promise<PostViewModels[]> {
+  async getPosts(): Promise<CommentViewModels[]> {
     return this.PostModel.find();
   }
 
@@ -42,7 +41,7 @@ export class PostRepository {
     }
   }
 
-  async getPostId(postId: string): Promise<PostViewModels | null> {
+  async getPostId(postId: string): Promise<CommentViewModels | null> {
     return this.PostModel.findOne({ id: postId }, { __v: 0, _id: 0 });
   }
 

@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class CommentService {
+export class CommentRepository {
   constructor() {}
-
-  async getCommentsId(commentId: string) {}
 }

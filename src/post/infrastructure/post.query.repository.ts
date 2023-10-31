@@ -31,7 +31,12 @@ export class PostQueryRepository {
       blogId: el.blogId,
       blogName: el.blogName,
       createdAt: el.createdAt,
-      extendedLikesInfo: el.extendedLikesInfo,
+      extendedLikesInfo: {
+        likesCount: el.extendedLikesInfo.likesCount,
+        dislikesCount: el.extendedLikesInfo.dislikesCount,
+        myStatus: el.extendedLikesInfo.myStatus,
+        newestLikes: el.extendedLikesInfo.newestLikes,
+      },
     }));
 
     return {

@@ -13,8 +13,9 @@ import {
 import { CreatePostDto } from '../dto/post.dto';
 import { PostService } from './post.service';
 import { BlogService } from '../../blog/infrastructure/blog.service';
-import { PostViewModels } from '../models/post.view.models';
+import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { QueryDto } from '../../blog/dto/blog.query.dto';
+import { PostViewModels } from '../models/post.view.models';
 
 @Controller('posts')
 export class PostController {
@@ -45,7 +46,7 @@ export class PostController {
   @Get(':postId')
   async getPostId(
     @Param('postId') postId: string,
-  ): Promise<PostViewModels | null> {
+  ): Promise<CommentViewModels | null> {
     return this.postService.getPostId(postId);
   }
 
