@@ -1,12 +1,9 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class BlogQueryDto {
+export class QueryDto {
   @IsString()
   @IsOptional()
-  searchNameTerm: string = '';
-  @IsString()
-  @IsOptional()
-  sortBy: string = 'createAt';
+  sortBy: string = 'createdAt';
   @IsString()
   @IsOptional()
   sortDirection: string = 'desc';

@@ -3,6 +3,7 @@ import { LikesInfo } from './comment.schema';
 export class CommentViewModels {
   constructor(
     public id: string,
+    public postId: string,
     public content: string,
     public commentatorInfo: {
       userId: string;

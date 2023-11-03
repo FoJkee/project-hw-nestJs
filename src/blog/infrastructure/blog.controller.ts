@@ -13,11 +13,12 @@ import {
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from '../dto/blog.dto';
 import { BlogViewModels } from '../models/blog.view.models';
-import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostService } from '../../post/infrastructure/post.service';
 import { CreatePostDto } from '../../post/dto/post.dto';
 import { BlogQueryDto } from '../dto/blog.query.dto';
 import { PostViewModels } from '../../post/models/post.view.models';
+import { PaginationView } from '../../pagination/pagination';
+import { QueryDto } from '../../pagination/pagination.query.dto';
 
 @Controller('blogs')
 export class BlogController {
@@ -27,8 +28,10 @@ export class BlogController {
   ) {}
 
   @Get()
-  async getBlogs(@Query() blogQueryDto: BlogQueryDto) {
-    return this.blogService.getBlogs(blogQueryDto);
+  async getBlogs(
+    @Query() blogQueryDto: BlogQueryDto,
+  ): Promise<PaginationView<BlogViewModels[]>> {
+    return await this.blogService.getBlogs(blogQueryDto);
   }
 
   @Post()
@@ -40,7 +43,12 @@ export class BlogController {
   }
 
   @Get(':blogId/posts')
-  findPostForBlog() {}
+  getPostForBlog(
+    @Param('blogId') blogId: string,
+    @Query() queryDto: QueryDto,
+  ): Promise<PaginationView<PostViewModels[]>> {
+    return this.blogService.getPostForBlog(queryDto, blogId);
+  }
 
   @Post(':blogId/posts')
   @HttpCode(201)

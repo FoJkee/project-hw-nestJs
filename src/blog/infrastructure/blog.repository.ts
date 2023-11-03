@@ -10,21 +10,6 @@ export class BlogRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
   ) {}
 
-  // async getBlogs(blogQueryDto: BlogQueryDto): Promise<BlogViewModels[]> {
-  //   const filter = {
-  //     name: { $regex: blogQueryDto.searchNameTerm, $options: 'i' },
-  //   };
-  //
-  //   return this.BlogModel.find(filter, { _id: 0, __v: 0 })
-  //     .sort({
-  //       [blogQueryDto.sortBy]:
-  //         blogQueryDto.sortDirection === 'asc' ? 'asc' : 'desc',
-  //     })
-  //     .skip((blogQueryDto.pageNumber - 1) * blogQueryDto.pageSize)
-  //     .limit(blogQueryDto.pageSize);
-  //
-  // }
-
   async createBlog(newBlog: Blog): Promise<boolean> {
     try {
       await this.BlogModel.create(newBlog);

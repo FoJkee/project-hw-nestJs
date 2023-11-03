@@ -1,4 +1,4 @@
-import { QueryDto } from '../blog/dto/blog.query.dto';
+import { QueryDto } from '../pagination/pagination.query.dto';
 
 export const pagesCount = (totalCount: number, pageSize: number) => {
   return Math.ceil(totalCount / pageSize);

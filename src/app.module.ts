@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BlogModule } from './blog/blog.module';
 import { TestingModule } from './testing/testing.module';
 import { PostModule } from './post/post.module';
+import { CommentModule } from './comment/comment.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { PostModule } from './post/post.module';
     BlogModule,
     TestingModule,
     PostModule,
+    CommentModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

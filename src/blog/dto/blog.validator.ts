@@ -1,5 +1,4 @@
 import {
-  ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
@@ -9,9 +8,9 @@ import { BlogService } from '../infrastructure/blog.service';
 @ValidatorConstraint({ name: 'BlogValidatorExist', async: true })
 @Injectable()
 export class BlogValidator implements ValidatorConstraintInterface {
-  constructor(private blogService: BlogService) {}
+  constructor(private readonly blogService: BlogService) {}
 
-  async validate(id: string) {
+  async validate(id: string): Promise<boolean> {
     try {
       const blogData = await this.blogService.findBlogId(id);
       if (!blogData) return false;
@@ -20,7 +19,7 @@ export class BlogValidator implements ValidatorConstraintInterface {
       return false;
     }
   }
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return `Blog doesn't exist`;
   }
 }

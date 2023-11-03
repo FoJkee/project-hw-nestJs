@@ -7,6 +7,7 @@ import { BlogRepository } from './blog.repository';
 import { BlogQueryRepository } from './blog.query.repository';
 import { BlogQueryDto } from '../dto/blog.query.dto';
 import { PaginationView } from '../../pagination/pagination';
+import { QueryDto } from '../../pagination/pagination.query.dto';
 
 @Injectable()
 export class BlogService {
@@ -47,5 +48,9 @@ export class BlogService {
 
   async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {
     return this.blogRepository.updateBlogId(createBlogDto, blogId);
+  }
+
+  async getPostForBlog(queryDto: QueryDto, blogId: string) {
+    return this.blogQueryRepository.getPostForBlog(queryDto, blogId);
   }
 }

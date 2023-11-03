@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { myStatusView } from './post.view.models';
 
+@Schema()
 export class NewestLike {
   @Prop({ required: true, type: String })
   addedAt: string;
@@ -10,9 +11,9 @@ export class NewestLike {
   @Prop({ required: true, type: String })
   login: string;
 }
-
 export const NewestLikeSchema = SchemaFactory.createForClass(NewestLike);
 
+@Schema()
 export class extendedLikesInfo {
   @Prop({ required: true, type: Number, default: 0 })
   likesCount: number;
@@ -23,7 +24,6 @@ export class extendedLikesInfo {
   @Prop({ required: true, type: [NewestLikeSchema] })
   newestLikes: NewestLike[];
 }
-
 export const extendedLikesInfoSchema =
   SchemaFactory.createForClass(extendedLikesInfo);
 

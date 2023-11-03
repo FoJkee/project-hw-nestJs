@@ -1,13 +1,17 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../models/blog.schema';
 import { Model } from 'mongoose';
-import { BlogQueryDto, QueryDto } from '../dto/blog.query.dto';
+import { BlogQueryDto } from '../dto/blog.query.dto';
 import { pagination, PaginationView } from '../../pagination/pagination';
 import { BlogViewModels } from '../models/blog.view.models';
+import { QueryDto } from '../../pagination/pagination.query.dto';
+import { Post, PostDocument } from '../../post/models/post.schema';
+import { PostViewModels } from '../../post/models/post.view.models';
 
 export class BlogQueryRepository {
   constructor(
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
+    @InjectModel(Post.name) private readonly PostModel: Model<PostDocument>,
   ) {}
 
   async getBlogs(
@@ -29,21 +33,36 @@ export class BlogQueryRepository {
 
     const countDocument: number = await this.BlogModel.countDocuments(filter);
 
-    const getBlogs: Blog[] = await blog.map((el) => ({
-      id: el.id,
-      name: el.name,
-      description: el.description,
-      websiteUrl: el.websiteUrl,
-      createdAt: el.createdAt,
-      isMembership: el.isMembership,
-    }));
+    return {
+      pagesCount: Math.ceil(countDocument / pageSize),
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: countDocument,
+      items: blog,
+    };
+  }
+  async getPostForBlog(
+    queryDto: QueryDto,
+    blogId: string,
+  ): Promise<PaginationView<PostViewModels[]>> {
+    const { pageSize, pageNumber, sortDirection, sortBy } =
+      pagination(queryDto);
+
+    const filter = { blogId };
+
+    const post = await this.PostModel.find(filter, { _id: 0, __v: 0 })
+      .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
+      .skip(pageSize * (pageNumber - 1))
+      .limit(pageSize);
+
+    const countDocument = await this.PostModel.countDocuments(filter);
 
     return {
       pagesCount: Math.ceil(countDocument / pageSize),
       page: pageNumber,
       pageSize: pageSize,
       totalCount: countDocument,
-      items: getBlogs,
+      items: post,
     };
   }
 }

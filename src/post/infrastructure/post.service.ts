@@ -6,17 +6,17 @@ import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
 import { BlogRepository } from '../../blog/infrastructure/blog.repository';
-import { QueryDto } from '../../blog/dto/blog.query.dto';
 import { PostQueryRepository } from './post.query.repository';
 import { PaginationView } from '../../pagination/pagination';
 import { myStatusView, PostViewModels } from '../models/post.view.models';
+import { QueryDto } from '../../pagination/pagination.query.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly blogRepository: BlogRepository,
-    private blogService: BlogService,
+    private readonly blogService: BlogService,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
 
@@ -64,5 +64,12 @@ export class PostService {
 
   async deletePostId(postId: string): Promise<boolean> {
     return this.postRepository.deletePostId(postId);
+  }
+
+  async getCommentForPost(
+    queryDto: QueryDto,
+    postId: string,
+  ): Promise<PaginationView<CommentViewModels[]>> {
+    return this.postQueryRepository.getCommentForPost(queryDto, postId);
   }
 }
