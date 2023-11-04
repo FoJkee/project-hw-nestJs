@@ -21,7 +21,7 @@ export class UserService {
     return this.userQueryRepository.getUsers(userQueryDto);
   }
 
-  async createUser(userDto: UserDto): Promise<UserViewModels> {
+  async createUser(userDto: UserDto): Promise<UserViewModels | null> {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(userDto.password, salt);
     const code = randomStringGenerator();
@@ -38,9 +38,7 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    const result = await this.userRepository.createUser({ ...newUser });
-    if (!result) throw new Error();
-    return result;
+    return this.userRepository.createUser({ ...newUser });
   }
 
   async deleteUserId(userId: string): Promise<boolean> {

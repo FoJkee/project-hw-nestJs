@@ -27,11 +27,12 @@ export class UserController {
 
   @Post()
   @HttpCode(201)
-  async createUser(@Body() userDto: UserDto): Promise<UserViewModels> {
+  async createUser(@Body() userDto: UserDto): Promise<UserViewModels | null> {
     return this.userService.createUser(userDto);
   }
 
   @Delete(':userId')
+  @HttpCode(204)
   async deleteUserId(@Param('userId') userId: string): Promise<boolean> {
     return this.userService.deleteUserId(userId);
   }
