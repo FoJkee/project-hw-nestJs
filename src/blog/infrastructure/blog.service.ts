@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Blog } from '../models/blog.schema';
 import { CreateBlogDto } from '../dto/blog.dto';
 import { BlogViewModels } from '../models/blog.view.models';
@@ -39,18 +43,32 @@ export class BlogService {
   }
 
   async deleteBlogId(blogId: string): Promise<boolean> {
-    return this.blogRepository.deleteBlogId(blogId);
+    const result = await this.blogRepository.deleteBlogId(blogId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async findBlogId(blogId: string) {
-    return this.blogRepository.findBlogId(blogId);
+    const result = await this.blogRepository.findBlogId(blogId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {
-    return this.blogRepository.updateBlogId(createBlogDto, blogId);
+    const result = await this.blogRepository.updateBlogId(
+      createBlogDto,
+      blogId,
+    );
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async getPostForBlog(queryDto: QueryDto, blogId: string) {
-    return this.blogQueryRepository.getPostForBlog(queryDto, blogId);
+    const result = await this.blogQueryRepository.getPostForBlog(
+      queryDto,
+      blogId,
+    );
+    if (!result) throw new NotFoundException();
+    return result;
   }
 }

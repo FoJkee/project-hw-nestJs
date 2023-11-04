@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post } from '../models/post.schema';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { CreatePostDto } from '../dto/post.dto';
@@ -46,7 +46,7 @@ export class PostService {
         newestLikes: [],
       },
     };
-    await this.postRepository.createPost({ ...newPost });
+    await this.postRepository.createPost(newPost);
     return newPost;
   }
 
@@ -54,15 +54,24 @@ export class PostService {
     postId: string,
     createPostDto: CreatePostDto,
   ): Promise<boolean> {
-    return this.postRepository.updatePostId(postId, createPostDto);
+    const result = await this.postRepository.updatePostId(
+      postId,
+      createPostDto,
+    );
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
-  async getPostId(postId: string): Promise<CommentViewModels | null> {
-    return this.postRepository.getPostId(postId);
+  async getPostId(postId: string): Promise<PostViewModels | null> {
+    const result = await this.postRepository.getPostId(postId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async deletePostId(postId: string): Promise<boolean> {
-    return this.postRepository.deletePostId(postId);
+    const result = await this.postRepository.deletePostId(postId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async getCommentForPost(

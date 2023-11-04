@@ -17,7 +17,6 @@ import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { PaginationView } from '../../pagination/pagination';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Controller('posts')
 export class PostController {
@@ -46,10 +45,10 @@ export class PostController {
   }
 
   @Get(':postId')
-  async getPostId(@Param('postId') postId: string): Promise<CommentViewModels> {
-    const result = await this.postService.getPostId(postId);
-    if (!result) throw new NotFoundException();
-    return result;
+  async getPostId(
+    @Param('postId') postId: string,
+  ): Promise<PostViewModels | null> {
+    return this.postService.getPostId(postId);
   }
 
   @Put(':postId')
@@ -58,8 +57,6 @@ export class PostController {
     @Param('postId') postId: string,
     @Body() createPostDto: CreatePostDto,
   ): Promise<boolean> {
-    const post = await this.postService.getPostId(postId);
-    if (!post) throw new NotFoundException();
     return this.postService.updatePostId(postId, createPostDto);
   }
 

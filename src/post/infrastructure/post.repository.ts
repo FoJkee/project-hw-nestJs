@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../models/post.schema';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blog/models/blog.schema';
-import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { CreatePostDto } from '../dto/post.dto';
 import { PostViewModels } from '../models/post.view.models';
 
@@ -14,13 +13,9 @@ export class PostRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
   ) {}
 
-  async createPost(newPost: PostViewModels) {
-    try {
-      await this.PostModel.create(newPost);
-      return true;
-    } catch (e) {
-      return false;
-    }
+  async createPost(newPost: PostViewModels): Promise<PostViewModels | null> {
+    await this.PostModel.create(newPost);
+    return this.getPostId(newPost.id);
   }
 
   async updatePostId(
@@ -38,8 +33,11 @@ export class PostRepository {
     }
   }
 
-  async getPostId(postId: string): Promise<CommentViewModels | null> {
-    return this.PostModel.findOne({ id: postId }, { __v: 0, _id: 0 });
+  async getPostId(postId: string): Promise<PostViewModels | null> {
+    return this.PostModel.findOne(
+      { id: postId },
+      { __v: 0, _id: 0, extendedLikesInfo: { _id: 0 } },
+    ).lean();
   }
   async deletePostId(postId: string): Promise<boolean> {
     try {

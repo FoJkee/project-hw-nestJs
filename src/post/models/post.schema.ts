@@ -11,6 +11,7 @@ export class NewestLike {
   @Prop({ required: true, type: String })
   login: string;
 }
+
 export const NewestLikeSchema = SchemaFactory.createForClass(NewestLike);
 
 @Schema()

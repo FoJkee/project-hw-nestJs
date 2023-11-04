@@ -63,9 +63,7 @@ export class BlogController {
 
   @Get(':blogId')
   async findBlogId(@Param('blogId') blogId: string) {
-    const blog = await this.blogService.findBlogId(blogId);
-    if (!blog) throw new NotFoundException();
-    return blog;
+    return this.blogService.findBlogId(blogId);
   }
 
   @Put(':blogId')
@@ -74,16 +72,12 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createBlogDto: CreateBlogDto,
   ): Promise<boolean> {
-    const blog = await this.blogService.findBlogId(blogId);
-    if (!blog) throw new NotFoundException();
     return this.blogService.updateBlogId(createBlogDto, blogId);
   }
 
   @Delete(':blogId')
   @HttpCode(204)
   async deleteBlogId(@Param('blogId') blogId: string): Promise<boolean> {
-    const blog = await this.blogService.findBlogId(blogId);
-    if (!blog) throw new NotFoundException();
     return this.blogService.deleteBlogId(blogId);
   }
 }

@@ -12,14 +12,18 @@ export class UserQueryRepository {
     @InjectModel(User.name) private readonly UserModel: Model<UserDocument>,
   ) {}
 
-  public async getUsers(
+  async getUsers(
     userQueryDto: UserQueryDto,
   ): Promise<PaginationView<UserViewModels[]>> {
-    const { pageSize, pageNumber, sortBy, sortDirection } =
+    const { sortBy, pageSize, pageNumber, sortDirection } =
       pagination(userQueryDto);
 
-    const searchEmailTerm = userQueryDto.searchEmailTerm;
-    const searchLoginTerm = userQueryDto.searchLoginTerm;
+    const searchEmailTerm = userQueryDto.searchEmailTerm
+      ? userQueryDto.searchEmailTerm.toString()
+      : null;
+    const searchLoginTerm = userQueryDto.searchLoginTerm
+      ? userQueryDto.searchLoginTerm.toString()
+      : null;
 
     const filter: any = {};
 
@@ -33,8 +37,8 @@ export class UserQueryRepository {
 
     if (searchEmailTerm && searchLoginTerm) {
       filter.$or = [
-        { login: { $regex: searchLoginTerm, $options: 'i' } },
         { email: { $regex: searchEmailTerm, $options: 'i' } },
+        { login: { $regex: searchLoginTerm, $options: 'i' } },
       ];
     }
 
@@ -48,14 +52,16 @@ export class UserQueryRepository {
       .skip(pageSize * (pageNumber - 1))
       .limit(pageSize);
 
-    const userCountDocument = await this.UserModel.countDocuments(filter);
+    const userCountDocument: number =
+      await this.UserModel.countDocuments(filter);
 
-    return {
+    const result = {
       pagesCount: Math.ceil(userCountDocument / pageSize),
       page: pageNumber,
       pageSize: pageSize,
       totalCount: userCountDocument,
       items: users,
     };
+    return result;
   }
 }
