@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto } from '../dto/user.dto';
 import { User } from '../models/user.schema';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
@@ -38,10 +38,14 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    return this.userRepository.createUser({ ...newUser });
+    const result = await this.userRepository.createUser(newUser);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
-  async deleteUserId(userId: string): Promise<boolean> {
-    return this.userRepository.deleteUserId(userId);
+  async deleteUserId(userId: string) {
+    const result = await this.userRepository.deleteUserId(userId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 }

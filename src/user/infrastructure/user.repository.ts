@@ -18,7 +18,7 @@ export class UserRepository {
     return this.UserModel.findOne({ email }, { _id: 0 });
   }
 
-  async createUser(newUser: UserViewModels): Promise<UserViewModels | null> {
+  async createUser(newUser: User): Promise<UserViewModels | null> {
     await this.UserModel.create(newUser);
     return this._findUserId(newUser.id);
   }
@@ -30,12 +30,7 @@ export class UserRepository {
     );
   }
 
-  async deleteUserId(userId: string): Promise<boolean> {
-    try {
-      await this.UserModel.deleteOne({ id: userId });
-      return true;
-    } catch (e) {
-      return false;
-    }
+  async deleteUserId(userId: string) {
+    return this.UserModel.findOneAndDelete({ id: userId });
   }
 }

@@ -18,18 +18,23 @@ export class UserQueryRepository {
     const { pageSize, pageNumber, sortBy, sortDirection } =
       pagination(userQueryDto);
 
+    const searchEmailTerm = userQueryDto.searchEmailTerm;
+    const searchLoginTerm = userQueryDto.searchLoginTerm;
+
     const filter: any = {};
-    if (userQueryDto.searchEmailTerm) {
-      filter.email = { $regex: userQueryDto.searchEmailTerm, $options: 'i' };
+
+    if (searchEmailTerm) {
+      filter.email = { $regex: searchEmailTerm, $options: 'i' };
     }
 
-    if (userQueryDto.searchLoginTerm) {
-      filter.login = { $regex: userQueryDto.searchLoginTerm, $options: 'i' };
+    if (searchLoginTerm) {
+      filter.login = { $regex: searchLoginTerm, $options: 'i' };
     }
-    if (userQueryDto.searchEmailTerm && userQueryDto.searchLoginTerm) {
+
+    if (searchEmailTerm && searchLoginTerm) {
       filter.$or = [
-        { login: { $regex: userQueryDto.searchEmailTerm, $options: 'i' } },
-        { email: { $regex: userQueryDto.searchLoginTerm, $options: 'i' } },
+        { login: { $regex: searchLoginTerm, $options: 'i' } },
+        { email: { $regex: searchEmailTerm, $options: 'i' } },
       ];
     }
 

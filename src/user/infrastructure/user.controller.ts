@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -13,6 +14,7 @@ import { UserQueryDto } from '../dto/user.query.dto';
 import { PaginationView } from '../../pagination/pagination';
 import { UserViewModels } from '../models/user.view.models';
 import { UserDto } from '../dto/user.dto';
+import * as readline from 'readline';
 
 @Controller('users')
 export class UserController {
@@ -22,7 +24,7 @@ export class UserController {
   async getUser(
     @Query() userQueryDto: UserQueryDto,
   ): Promise<PaginationView<UserViewModels[]>> {
-    return await this.userService.getUser(userQueryDto);
+    return this.userService.getUser(userQueryDto);
   }
 
   @Post()
@@ -33,7 +35,7 @@ export class UserController {
 
   @Delete(':userId')
   @HttpCode(204)
-  async deleteUserId(@Param('userId') userId: string): Promise<boolean> {
+  async deleteUserId(@Param('userId') userId: string) {
     return this.userService.deleteUserId(userId);
   }
 }

@@ -17,6 +17,7 @@ import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { PaginationView } from '../../pagination/pagination';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
 @Controller('posts')
 export class PostController {
@@ -34,7 +35,7 @@ export class PostController {
   @HttpCode(201)
   async createPost(
     @Body() createPostDto: CreatePostDto,
-  ): Promise<PostViewModels> {
+  ): Promise<PostViewModels | null> {
     const blog = await this.blogService.findBlogId(createPostDto.blogId);
     if (!blog) throw new NotFoundException();
     return this.postService.createPost(
@@ -45,10 +46,10 @@ export class PostController {
   }
 
   @Get(':postId')
-  async getPostId(
-    @Param('postId') postId: string,
-  ): Promise<CommentViewModels | null> {
-    return this.postService.getPostId(postId);
+  async getPostId(@Param('postId') postId: string): Promise<CommentViewModels> {
+    const result = await this.postService.getPostId(postId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   @Put(':postId')
@@ -65,9 +66,11 @@ export class PostController {
   @Delete('postId')
   @HttpCode(204)
   async deletePostId(@Param('postId') postId: string): Promise<boolean> {
-    const post = await this.postService.getPostId(postId);
-    if (!post) throw new NotFoundException();
-    return this.postService.deletePostId(postId);
+    // const post = await this.postService.getPostId(postId);
+    // if (!post) throw new NotFoundException();
+    const result = await this.postService.deletePostId(postId);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   @Get(':postId/comments')

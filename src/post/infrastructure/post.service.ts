@@ -30,13 +30,13 @@ export class PostService {
     createPostDto: CreatePostDto,
     blogId: string,
     blogName: string,
-  ): Promise<PostViewModels> {
+  ): Promise<PostViewModels | null> {
     const newPost: Post = {
       id: randomStringGenerator(),
       title: createPostDto.title,
       shortDescription: createPostDto.shortDescription,
       content: createPostDto.content,
-      blogId: createPostDto.blogId,
+      blogId,
       blogName,
       createdAt: new Date().toISOString(),
       extendedLikesInfo: {
@@ -46,8 +46,7 @@ export class PostService {
         newestLikes: [],
       },
     };
-    const result = await this.postRepository.createPost(newPost);
-    if (!result) throw new BadRequestException();
+    await this.postRepository.createPost({ ...newPost });
     return newPost;
   }
 

@@ -55,7 +55,7 @@ export class BlogController {
   async createPostForBlog(
     @Param('blogId') blogId: string,
     @Body() createPostDto: CreatePostDto,
-  ): Promise<PostViewModels> {
+  ): Promise<PostViewModels | null> {
     const blog = await this.blogService.findBlogId(blogId);
     if (!blog) throw new NotFoundException();
     return this.postService.createPost(createPostDto, blogId, blog.name);
