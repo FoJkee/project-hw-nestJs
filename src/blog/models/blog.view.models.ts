@@ -1,6 +1,8 @@
+import { Types } from 'mongoose';
+
 export class BlogViewModels {
   constructor(
-    public id: string,
+    public id: Types.ObjectId,
     public name: string,
     public description: string,
     public websiteUrl: string,

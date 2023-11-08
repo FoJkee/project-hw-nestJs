@@ -6,12 +6,12 @@ import {
 import { Blog } from '../models/blog.schema';
 import { CreateBlogDto } from '../dto/blog.dto';
 import { BlogViewModels } from '../models/blog.view.models';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { BlogRepository } from './blog.repository';
 import { BlogQueryRepository } from './blog.query.repository';
 import { BlogQueryDto } from '../dto/blog.query.dto';
 import { PaginationView } from '../../pagination/pagination';
 import { QueryDto } from '../../pagination/pagination.query.dto';
+import mongoose, { Types } from 'mongoose';
 
 @Injectable()
 export class BlogService {
@@ -30,7 +30,7 @@ export class BlogService {
     createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModels | boolean> {
     const newBlog: Blog = {
-      id: randomStringGenerator(),
+      id: new mongoose.Types.ObjectId(), //mongoose.Types.ObjectId
       name: createBlogDto.name,
       description: createBlogDto.description,
       websiteUrl: createBlogDto.websiteUrl,
@@ -43,32 +43,26 @@ export class BlogService {
   }
 
   async deleteBlogId(blogId: string): Promise<boolean> {
-    const result = await this.blogRepository.deleteBlogId(blogId);
-    if (!result) throw new NotFoundException();
-    return result;
+    const blog = await this.blogRepository.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return this.blogRepository.deleteBlogId(blogId);
   }
 
   async findBlogId(blogId: string) {
-    const result = await this.blogRepository.findBlogId(blogId);
-    if (!result) throw new NotFoundException();
-    return result;
+    const blog = await this.blogRepository.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return blog;
   }
 
   async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {
-    const result = await this.blogRepository.updateBlogId(
-      createBlogDto,
-      blogId,
-    );
-    if (!result) throw new NotFoundException();
-    return result;
+    const blog = await this.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return this.blogRepository.updateBlogId(createBlogDto, blogId);
   }
 
   async getPostForBlog(queryDto: QueryDto, blogId: string) {
-    const result = await this.blogQueryRepository.getPostForBlog(
-      queryDto,
-      blogId,
-    );
-    if (!result) throw new NotFoundException();
-    return result;
+    const blog = await this.blogRepository.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return this.blogQueryRepository.getPostForBlog(queryDto, blogId);
   }
 }

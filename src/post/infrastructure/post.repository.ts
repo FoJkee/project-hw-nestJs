@@ -13,9 +13,13 @@ export class PostRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
   ) {}
 
-  async createPost(newPost: PostViewModels): Promise<PostViewModels | null> {
-    await this.PostModel.create(newPost);
-    return this.getPostId(newPost.id);
+  async createPost(newPost: Post): Promise<PostViewModels | boolean> {
+    try {
+      await this.PostModel.create(newPost);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async updatePostId(

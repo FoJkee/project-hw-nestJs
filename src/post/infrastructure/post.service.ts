@@ -10,6 +10,7 @@ import { PostQueryRepository } from './post.query.repository';
 import { PaginationView } from '../../pagination/pagination';
 import { myStatusView, PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
+import mongoose, { Types } from 'mongoose';
 
 @Injectable()
 export class PostService {
@@ -32,7 +33,7 @@ export class PostService {
     blogName: string,
   ): Promise<PostViewModels | null> {
     const newPost: Post = {
-      id: randomStringGenerator(),
+      id: new Types.ObjectId(),
       title: createPostDto.title,
       shortDescription: createPostDto.shortDescription,
       content: createPostDto.content,
@@ -54,24 +55,21 @@ export class PostService {
     postId: string,
     createPostDto: CreatePostDto,
   ): Promise<boolean> {
-    const result = await this.postRepository.updatePostId(
-      postId,
-      createPostDto,
-    );
-    if (!result) throw new NotFoundException();
-    return result;
+    const post = await this.postRepository.getPostId(postId);
+    if (!post) throw new NotFoundException();
+    return this.postRepository.updatePostId(postId, createPostDto);
   }
 
   async getPostId(postId: string): Promise<PostViewModels | null> {
-    const result = await this.postRepository.getPostId(postId);
-    if (!result) throw new NotFoundException();
-    return result;
+    const post = await this.postRepository.getPostId(postId);
+    if (!post) throw new NotFoundException();
+    return post;
   }
 
   async deletePostId(postId: string): Promise<boolean> {
-    const result = await this.postRepository.deletePostId(postId);
-    if (!result) throw new NotFoundException();
-    return result;
+    const post = await this.postRepository.getPostId(postId);
+    if (!post) throw new NotFoundException();
+    return this.postRepository.deletePostId(postId);
   }
 
   async getCommentForPost(

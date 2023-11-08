@@ -1,6 +1,8 @@
+import { Types } from 'mongoose';
+
 export class PostViewModels {
   constructor(
-    public id: string,
+    public id: Types.ObjectId,
     public title: string,
     public shortDescription: string,
     public content: string,

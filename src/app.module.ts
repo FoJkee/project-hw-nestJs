@@ -11,7 +11,7 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb+srv://FoJkee:5455301V@cluster.eqfs4gk.mongodb.net/?retryWrites=true&w=majority',
+      'mongodb+srv://romanovsky0815:5455301V@cluster0.d2r9cgs.mongodb.net/?retryWrites=true&w=majority',
     ),
     BlogModule,
     TestingModule,
@@ -23,3 +23,7 @@ import { UserModule } from './user/user.module';
   providers: [AppService],
 })
 export class AppModule {}
+
+//   imports: [ConfingService],
+//   useFactory(cinfigService: Co)=> configService.get('db')
+// }

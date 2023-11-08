@@ -20,27 +20,27 @@ export class UserQueryRepository {
 
     const searchEmailTerm = userQueryDto.searchEmailTerm
       ? userQueryDto.searchEmailTerm.toString()
-      : null;
+      : '';
     const searchLoginTerm = userQueryDto.searchLoginTerm
       ? userQueryDto.searchLoginTerm.toString()
-      : null;
+      : '';
 
     const filter: any = {};
 
-    if (searchEmailTerm) {
-      filter.email = { $regex: searchEmailTerm, $options: 'i' };
-    }
-
-    if (searchLoginTerm) {
-      filter.login = { $regex: searchLoginTerm, $options: 'i' };
-    }
-
     if (searchEmailTerm && searchLoginTerm) {
       filter.$or = [
-        { email: { $regex: searchEmailTerm, $options: 'i' } },
-        { login: { $regex: searchLoginTerm, $options: 'i' } },
+        { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
+        { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
       ];
     }
+    // if (searchEmailTerm) {
+    //   filter.email = { $regex: searchEmailTerm, $options: 'i' };
+    //   return;
+    // }
+    // if (searchLoginTerm) {
+    //   filter.login = { $regex: searchLoginTerm, $options: 'i' };
+    //   return
+    // }
 
     const users = await this.UserModel.find(filter, {
       _id: 0,

@@ -48,7 +48,11 @@ export class PostController {
   async getPostId(
     @Param('postId') postId: string,
   ): Promise<PostViewModels | null> {
-    return this.postService.getPostId(postId);
+    try {
+      return await this.postService.getPostId(postId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   @Put(':postId')
@@ -56,18 +60,22 @@ export class PostController {
   async updatePost(
     @Param('postId') postId: string,
     @Body() createPostDto: CreatePostDto,
-  ): Promise<boolean> {
-    return this.postService.updatePostId(postId, createPostDto);
+  ) {
+    try {
+      return await this.postService.updatePostId(postId, createPostDto);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
-  @Delete('postId')
+  @Delete(':postId')
   @HttpCode(204)
   async deletePostId(@Param('postId') postId: string): Promise<boolean> {
-    // const post = await this.postService.getPostId(postId);
-    // if (!post) throw new NotFoundException();
-    const result = await this.postService.deletePostId(postId);
-    if (!result) throw new NotFoundException();
-    return result;
+    try {
+      return await this.postService.deletePostId(postId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   @Get(':postId/comments')

@@ -43,11 +43,15 @@ export class BlogController {
   }
 
   @Get(':blogId/posts')
-  getPostForBlog(
+  async getPostForBlog(
     @Param('blogId') blogId: string,
     @Query() queryDto: QueryDto,
-  ): Promise<PaginationView<PostViewModels[]>> {
-    return this.blogService.getPostForBlog(queryDto, blogId);
+  ): Promise<PaginationView<PostViewModels[]> | null> {
+    try {
+      return await this.blogService.getPostForBlog(queryDto, blogId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   @Post(':blogId/posts')
@@ -56,14 +60,25 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels | null> {
-    const blog = await this.blogService.findBlogId(blogId);
-    if (!blog) throw new NotFoundException();
-    return this.postService.createPost(createPostDto, blogId, blog.name);
+    try {
+      const blog = await this.blogService.findBlogId(blogId);
+      return await this.postService.createPost(
+        createPostDto,
+        blogId,
+        blog!.name,
+      );
+    } catch {
+      throw new NotFoundException();
+    }
   }
 
   @Get(':blogId')
   async findBlogId(@Param('blogId') blogId: string) {
-    return this.blogService.findBlogId(blogId);
+    try {
+      return await this.blogService.findBlogId(blogId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   @Put(':blogId')
@@ -71,13 +86,21 @@ export class BlogController {
   async updateBlogId(
     @Param('blogId') blogId: string,
     @Body() createBlogDto: CreateBlogDto,
-  ): Promise<boolean> {
-    return this.blogService.updateBlogId(createBlogDto, blogId);
+  ): Promise<boolean | null> {
+    try {
+      return this.blogService.updateBlogId(createBlogDto, blogId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 
   @Delete(':blogId')
   @HttpCode(204)
   async deleteBlogId(@Param('blogId') blogId: string): Promise<boolean> {
-    return this.blogService.deleteBlogId(blogId);
+    try {
+      return await this.blogService.deleteBlogId(blogId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 }

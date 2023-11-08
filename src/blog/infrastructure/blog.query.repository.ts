@@ -50,10 +50,15 @@ export class BlogQueryRepository {
 
     const filter = { blogId };
 
-    const post = await this.PostModel.find(filter, { _id: 0, __v: 0 })
+    const post = await this.PostModel.find(filter, {
+      _id: 0,
+      __v: 0,
+      extendedLikesInfo: { _id: 0 },
+    })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
       .skip(pageSize * (pageNumber - 1))
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
 
     const countDocument = await this.PostModel.countDocuments(filter);
 
