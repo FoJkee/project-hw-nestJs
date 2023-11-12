@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserDto } from '../dto/user.dto';
-import { User } from '../models/user.schema';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { UserEntity } from '../models/user.schema';
 import bcrypt from 'bcrypt';
 import { UserViewModels } from '../models/user.view.models';
 import { UserRepository } from './user.repository';
 import { UserQueryRepository } from './user.query.repository';
 import { UserQueryDto } from '../dto/user.query.dto';
 import { PaginationView } from '../../pagination/pagination';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -24,10 +24,10 @@ export class UserService {
   async createUser(userDto: UserDto): Promise<UserViewModels | null> {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(userDto.password, salt);
-    const code = randomStringGenerator();
+    const code = randomUUID();
 
-    const newUser: User = {
-      id: randomStringGenerator(),
+    const newUser: UserEntity = {
+      id: randomUUID(),
       login: userDto.login,
       email: userDto.email,
       createdAt: new Date().toISOString(),
@@ -38,7 +38,7 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    const result = await this.userRepository.createUser(newUser);
+    const result = await this.userRepository.createUser({ ...newUser });
     if (!result) throw new NotFoundException();
     return result;
   }

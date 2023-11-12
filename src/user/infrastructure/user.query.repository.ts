@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../models/user.schema';
+import { UserEntity, UserDocument } from '../models/user.schema';
 import { Model } from 'mongoose';
 import { UserQueryDto } from '../dto/user.query.dto';
 import { pagination, PaginationView } from '../../pagination/pagination';
@@ -9,7 +9,8 @@ import { UserViewModels } from '../models/user.view.models';
 @Injectable()
 export class UserQueryRepository {
   constructor(
-    @InjectModel(User.name) private readonly UserModel: Model<UserDocument>,
+    @InjectModel(UserEntity.name)
+    private readonly UserModel: Model<UserDocument>,
   ) {}
 
   async getUsers(

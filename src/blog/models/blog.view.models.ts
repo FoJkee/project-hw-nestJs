@@ -1,12 +1,12 @@
-import { Types } from 'mongoose';
+import { randomUUID } from 'crypto';
 
 export class BlogViewModels {
   constructor(
-    public id: Types.ObjectId,
+    public id: string = randomUUID(),
     public name: string,
     public description: string,
     public websiteUrl: string,
-    public createdAt: string,
+    public createdAt: string = new Date().toISOString(),
     public isMembership: boolean,
   ) {}
 }

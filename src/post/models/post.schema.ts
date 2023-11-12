@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { myStatusView } from './post.view.models';
 
 @Schema()
@@ -31,8 +31,8 @@ export const extendedLikesInfoSchema =
 export type PostDocument = HydratedDocument<Post>;
 @Schema()
 export class Post {
-  @Prop({ required: true, type: SchemaTypes.ObjectId })
-  id: Types.ObjectId;
+  @Prop({ required: true, type: String })
+  id: string;
   @Prop({ required: true, type: String })
   title: string;
   @Prop({ required: true, type: String })

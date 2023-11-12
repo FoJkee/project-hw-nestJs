@@ -15,15 +15,3 @@ export class CreatePostDto {
   @BlogDecoratorExist()
   blogId: string;
 }
-
-export class CreatePostDtoView {
-  @IsString()
-  @MaxLength(30)
-  title: string;
-  @IsString()
-  @MaxLength(100)
-  shortDescription: string;
-  @IsString()
-  @MaxLength(1000)
-  content: string;
-}

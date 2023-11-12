@@ -17,6 +17,10 @@ import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { PaginationView } from '../../pagination/pagination';
+import { CommentDto } from '../../comment/dto/comment.dto';
+import { User } from '../../decorators/user.decorator';
+import { UserEntity } from '../../user/models/user.schema';
+import { Reaction } from '../../reaction/dto/reaction.dto';
 
 @Controller('posts')
 export class PostController {
@@ -47,9 +51,10 @@ export class PostController {
   @Get(':postId')
   async getPostId(
     @Param('postId') postId: string,
+    @User() user: UserEntity,
   ): Promise<PostViewModels | null> {
     try {
-      return await this.postService.getPostId(postId);
+      return await this.postService.getPostId(postId, user.id);
     } catch (e) {
       throw new NotFoundException();
     }
@@ -84,5 +89,32 @@ export class PostController {
     @Query() queryDto: QueryDto,
   ): Promise<PaginationView<CommentViewModels[]>> {
     return this.postService.getCommentForPost(queryDto, postId);
+  }
+
+  @Post(':postId/comments')
+  async createCommentForPost(
+    @Param('postId') postId: string,
+    @Body() createCommentDto: CommentDto,
+    @User() user: UserEntity,
+  ) {
+    return this.postService.createCommentForPost(
+      postId,
+      user,
+      createCommentDto.content,
+    );
+  }
+
+  @Put(':postId/like-status')
+  async updatePostIdLikeStatus(
+    @Param('postId') postId: string,
+    @User() user: UserEntity,
+    @Body() likeStatusDto: Reaction,
+  ) {
+    return this.postService.updatePostIdLikeStatus(
+      postId,
+      user.id,
+      user.login,
+      likeStatusDto.likeStatus,
+    );
   }
 }

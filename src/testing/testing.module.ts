@@ -4,13 +4,13 @@ import { TestingService } from './testing.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from '../blog/models/blog.schema';
 import { Post, PostSchema } from '../post/models/post.schema';
-import { User, UserSchema } from '../user/models/user.schema';
+import { UserEntity, UserSchema } from '../user/models/user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: UserEntity.name, schema: UserSchema }]),
   ],
   controllers: [TestingController],
   providers: [TestingService],

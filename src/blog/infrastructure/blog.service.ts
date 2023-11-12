@@ -11,7 +11,7 @@ import { BlogQueryRepository } from './blog.query.repository';
 import { BlogQueryDto } from '../dto/blog.query.dto';
 import { PaginationView } from '../../pagination/pagination';
 import { QueryDto } from '../../pagination/pagination.query.dto';
-import mongoose, { Types } from 'mongoose';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class BlogService {
@@ -30,7 +30,7 @@ export class BlogService {
     createBlogDto: CreateBlogDto,
   ): Promise<BlogViewModels | boolean> {
     const newBlog: Blog = {
-      id: new mongoose.Types.ObjectId(), //mongoose.Types.ObjectId
+      id: randomUUID(),
       name: createBlogDto.name,
       description: createBlogDto.description,
       websiteUrl: createBlogDto.websiteUrl,

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../blog/models/blog.schema';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from '../post/models/post.schema';
-import { User, UserDocument } from '../user/models/user.schema';
+import { UserEntity, UserDocument } from '../user/models/user.schema';
 import { UserService } from '../user/infrastructure/user.service';
 import { UserRepository } from '../user/infrastructure/user.repository';
 import { UserController } from '../user/infrastructure/user.controller';
@@ -13,7 +13,7 @@ export class TestingService {
   constructor(
     @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
     @InjectModel(Post.name) private PostModel: Model<PostDocument>,
-    @InjectModel(User.name) private UserModel: Model<UserDocument>,
+    @InjectModel(UserEntity.name) private UserModel: Model<UserDocument>,
   ) {}
   async deleteAll(): Promise<boolean> {
     try {

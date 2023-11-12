@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post } from '../models/post.schema';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { CreatePostDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
@@ -10,7 +9,11 @@ import { PostQueryRepository } from './post.query.repository';
 import { PaginationView } from '../../pagination/pagination';
 import { myStatusView, PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
-import mongoose, { Types } from 'mongoose';
+import { Comment } from '../../comment/models/comment.schema';
+import { CommentRepository } from '../../comment/infrastructure/comment.repository';
+import { UserRepository } from '../../user/infrastructure/user.repository';
+import { randomUUID } from 'crypto';
+import { UserEntity } from '../../user/models/user.schema';
 
 @Injectable()
 export class PostService {
@@ -19,6 +22,8 @@ export class PostService {
     private readonly blogRepository: BlogRepository,
     private readonly blogService: BlogService,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly commentRepository: CommentRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async getPosts(
@@ -33,7 +38,7 @@ export class PostService {
     blogName: string,
   ): Promise<PostViewModels | null> {
     const newPost: Post = {
-      id: new Types.ObjectId(),
+      id: randomUUID(),
       title: createPostDto.title,
       shortDescription: createPostDto.shortDescription,
       content: createPostDto.content,
@@ -60,8 +65,11 @@ export class PostService {
     return this.postRepository.updatePostId(postId, createPostDto);
   }
 
-  async getPostId(postId: string): Promise<PostViewModels | null> {
-    const post = await this.postRepository.getPostId(postId);
+  async getPostId(
+    postId: string,
+    userId: string | null,
+  ): Promise<PostViewModels | null> {
+    const post = await this.postRepository.getPostId(postId, userId);
     if (!post) throw new NotFoundException();
     return post;
   }
@@ -77,5 +85,43 @@ export class PostService {
     postId: string,
   ): Promise<PaginationView<CommentViewModels[]>> {
     return this.postQueryRepository.getCommentForPost(queryDto, postId);
+  }
+  async createCommentForPost(
+    postId: string,
+    user: UserEntity,
+    content: string,
+  ) {
+    const newComment: Comment = {
+      id: randomUUID(),
+      postId,
+      content,
+      commentatorInfo: {
+        userId: user.id,
+        userLogin: user.login,
+      },
+      createdAt: new Date().toISOString(),
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: myStatusView.None,
+      },
+    };
+
+    await this.commentRepository.createCommentForPost(newComment);
+    return newComment;
+  }
+
+  async updatePostIdLikeStatus(
+    postId: string,
+    userId: string,
+    userLogin: string,
+    status: myStatusView,
+  ) {
+    return this.postRepository.updatePostIdLikeStatus(
+      postId,
+      userId,
+      userLogin,
+      status,
+    );
   }
 }

@@ -23,7 +23,3 @@ import { UserModule } from './user/user.module';
   providers: [AppService],
 })
 export class AppModule {}
-
-//   imports: [ConfingService],
-//   useFactory(cinfigService: Co)=> configService.get('db')
-// }

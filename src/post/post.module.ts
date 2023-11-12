@@ -13,12 +13,19 @@ import { Comment, CommentSchema } from '../comment/models/comment.schema';
 import { CommentService } from '../comment/infrastructure/comment.service';
 import { CommentRepository } from '../comment/infrastructure/comment.repository';
 import { CommentController } from '../comment/infrastructure/comment.controller';
+import { Reaction, ReactionSchema } from '../reaction/models/reaction.schema';
+import { UserRepository } from '../user/infrastructure/user.repository';
+import { UserEntity, UserSchema } from '../user/models/user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
+    MongooseModule.forFeature([
+      { name: Reaction.name, schema: ReactionSchema },
+    ]),
+    MongooseModule.forFeature([{ name: UserEntity.name, schema: UserSchema }]),
   ],
   controllers: [PostController, CommentController],
   providers: [
@@ -30,6 +37,7 @@ import { CommentController } from '../comment/infrastructure/comment.controller'
     PostQueryRepository,
     CommentService,
     CommentRepository,
+    UserRepository,
   ],
 })
 export class PostModule {}

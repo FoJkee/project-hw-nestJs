@@ -1,8 +1,8 @@
-import { Types } from 'mongoose';
+import { randomUUID } from 'crypto';
 
 export class PostViewModels {
   constructor(
-    public id: Types.ObjectId,
+    public id: string = randomUUID(),
     public title: string,
     public shortDescription: string,
     public content: string,
