@@ -11,9 +11,9 @@ import { myStatusView, PostViewModels } from '../models/post.view.models';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { Comment } from '../../comment/models/comment.schema';
 import { CommentRepository } from '../../comment/infrastructure/comment.repository';
-import { UserRepository } from '../../user/infrastructure/user.repository';
 import { randomUUID } from 'crypto';
 import { UserEntity } from '../../user/models/user.schema';
+import { CommentDto } from '../../comment/dto/comment.dto';
 
 @Injectable()
 export class PostService {
@@ -23,7 +23,6 @@ export class PostService {
     private readonly blogService: BlogService,
     private readonly postQueryRepository: PostQueryRepository,
     private readonly commentRepository: CommentRepository,
-    private readonly userRepository: UserRepository,
   ) {}
 
   async getPosts(
@@ -65,11 +64,8 @@ export class PostService {
     return this.postRepository.updatePostId(postId, createPostDto);
   }
 
-  async getPostId(
-    postId: string,
-    userId: string | null,
-  ): Promise<PostViewModels | null> {
-    const post = await this.postRepository.getPostId(postId, userId);
+  async getPostId(postId: string): Promise<PostViewModels | null> {
+    const post = await this.postRepository.getPostId(postId);
     if (!post) throw new NotFoundException();
     return post;
   }
@@ -89,12 +85,12 @@ export class PostService {
   async createCommentForPost(
     postId: string,
     user: UserEntity,
-    content: string,
+    createCommentDto: CommentDto,
   ) {
     const newComment: Comment = {
       id: randomUUID(),
       postId,
-      content,
+      content: createCommentDto.content,
       commentatorInfo: {
         userId: user.id,
         userLogin: user.login,

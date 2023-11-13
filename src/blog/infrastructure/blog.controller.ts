@@ -65,7 +65,7 @@ export class BlogController {
       return await this.postService.createPost(
         createPostDto,
         blogId,
-        blog!.name,
+        blog.name,
       );
     } catch {
       throw new NotFoundException();

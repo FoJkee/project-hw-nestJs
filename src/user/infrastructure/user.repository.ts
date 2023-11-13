@@ -30,6 +30,7 @@ export class UserRepository {
       { _id: 0, __v: 0, passwordHash: 0, emailConfirmation: 0 },
     );
   }
+
   async deleteUserId(userId: string) {
     return this.UserModel.findOneAndDelete({ id: userId });
   }

@@ -7,6 +7,7 @@ import {
   Reaction,
   ReactionDocument,
 } from '../../reaction/models/reaction.schema';
+import { CommentViewModels } from '../models/comment.view.models';
 
 @Injectable()
 export class CommentRepository {
@@ -80,7 +81,9 @@ export class CommentRepository {
     );
     return true;
   }
-  async createCommentForPost(newComment: Comment): Promise<boolean> {
+  async createCommentForPost(
+    newComment: Comment,
+  ): Promise<CommentViewModels | boolean> {
     try {
       await this.CommentModel.create(newComment);
       return true;

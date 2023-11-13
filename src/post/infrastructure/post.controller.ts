@@ -21,6 +21,7 @@ import { CommentDto } from '../../comment/dto/comment.dto';
 import { User } from '../../decorators/user.decorator';
 import { UserEntity } from '../../user/models/user.schema';
 import { Reaction } from '../../reaction/dto/reaction.dto';
+import { UserId } from '../../decorators/userId.decorator';
 
 @Controller('posts')
 export class PostController {
@@ -51,10 +52,9 @@ export class PostController {
   @Get(':postId')
   async getPostId(
     @Param('postId') postId: string,
-    @User() user: UserEntity,
   ): Promise<PostViewModels | null> {
     try {
-      return await this.postService.getPostId(postId, user.id);
+      return await this.postService.getPostId(postId);
     } catch (e) {
       throw new NotFoundException();
     }
@@ -95,12 +95,12 @@ export class PostController {
   async createCommentForPost(
     @Param('postId') postId: string,
     @Body() createCommentDto: CommentDto,
-    @User() user: UserEntity,
-  ) {
+    @UserId() userId,
+  ): Promise<CommentViewModels> {
     return this.postService.createCommentForPost(
       postId,
-      user,
-      createCommentDto.content,
+      userId,
+      createCommentDto,
     );
   }
 

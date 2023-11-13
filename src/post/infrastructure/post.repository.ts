@@ -43,18 +43,15 @@ export class PostRepository {
     }
   }
 
-  async getPostId(
-    postId: string,
-    userId: string | null,
-  ): Promise<PostViewModels | null> {
-    const result = await this.PostModel.findOne(
+  async getPostId(postId: string): Promise<PostViewModels | null> {
+    return this.PostModel.findOne(
       { id: postId },
       { __v: 0, _id: 0, extendedLikesInfo: { _id: 0 } },
     ).lean();
 
-    if (!result) return null;
+    // if (!result) return null;
 
-    const newestLike = await this;
+    // const newestLike = await this;
   }
 
   async deletePostId(postId: string): Promise<boolean> {
