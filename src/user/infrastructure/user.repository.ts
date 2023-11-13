@@ -34,4 +34,14 @@ export class UserRepository {
   async deleteUserId(userId: string) {
     return this.UserModel.findOneAndDelete({ id: userId });
   }
+  async findUserByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<UserEntity | null> {
+    return this.UserModel.findOne(
+      {
+        $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
+      },
+      { _id: 0, __v: 0 },
+    );
+  }
 }

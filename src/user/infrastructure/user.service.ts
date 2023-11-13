@@ -48,4 +48,16 @@ export class UserService {
     if (!result) throw new NotFoundException();
     return result;
   }
+
+  async validateUserAndPass(
+    loginOrEmail: string,
+    password: string,
+  ): Promise<UserEntity | null> {
+    const user = await this.userRepository.findUserByLoginOrEmail(loginOrEmail);
+    if (!user) return null;
+
+    const comparePassword = await bcrypt.compare(password, user.passwordHash);
+    if (!comparePassword) return null;
+    return user;
+  }
 }
