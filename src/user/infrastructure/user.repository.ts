@@ -31,6 +31,10 @@ export class UserRepository {
     );
   }
 
+  async findUserId(userId: string): Promise<UserViewModels | null> {
+    return this.UserModel.findOne({ id: userId });
+  }
+
   async deleteUserId(userId: string) {
     return this.UserModel.findOneAndDelete({ id: userId });
   }

@@ -60,4 +60,8 @@ export class UserService {
     if (!comparePassword) return null;
     return user;
   }
+
+  async findUserId(userId: string): Promise<UserViewModels | null> {
+    return this.userRepository.findUserId(userId);
+  }
 }

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { UserService } from '../../user/infrastructure/user.service';
 import { randomUUID } from 'crypto';
 import { JwtService } from '../jwt/jwt';
 import { Device } from '../../security-devices/models/device.schema';
 import { SecurityDevicesService } from '../../security-devices/infractructure/security-devices.service';
+import { DeviceDto } from '../../security-devices/dto/device.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,11 +23,8 @@ export class AuthService {
     if (!user) return null;
     const deviceId = randomUUID();
 
-    const accessToken = await this.jwtService.createAccessToken(user.id);
-    const refreshToken = await this.jwtService.createRefreshToken(
-      deviceId,
-      user.id,
-    );
+    const { accessToken, refreshToken } =
+      await this.jwtService.createAccessAndRefreshToken(deviceId, user.id);
 
     const lastActiveDate =
       await this.jwtService.getLastActiveDateFromToken(refreshToken);
@@ -39,6 +37,38 @@ export class AuthService {
       lastActiveDate,
     };
     await this.securityDevicesService.createNewDevice(newDevice);
+    return { accessToken, refreshToken };
+  }
+
+  async logout(deviceDto: DeviceDto, userId: string) {
+    return this.securityDevicesService.deleteDeviceSessionUserId(
+      deviceDto.deviceId,
+      userId,
+    );
+  }
+
+  async refreshToken(token: string) {
+    const dataToken = await this.jwtService.verifyRefreshToken(token);
+    if (!dataToken) throw new UnauthorizedException();
+    // const userId = dataToken.userId;
+    // const deviceId = dataToken.deviceId;
+    const user = await this.userService.findUserId(dataToken.userId);
+    if (!user) throw new UnauthorizedException();
+
+    const { accessToken, refreshToken } =
+      await this.jwtService.createAccessAndRefreshToken(
+        dataToken.deviceId,
+        dataToken.userId,
+      );
+
+    const newDataToken =
+      await this.jwtService.getLastActiveDateFromToken(refreshToken);
+    await this.securityDevicesService.updateDevice(
+      user.id,
+      dataToken.deviceId,
+      newDataToken,
+    );
+
     return { accessToken, refreshToken };
   }
 }

@@ -56,13 +56,12 @@ export class UserQueryRepository {
     const userCountDocument: number =
       await this.UserModel.countDocuments(filter);
 
-    const result = {
+    return {
       pagesCount: Math.ceil(userCountDocument / pageSize),
       page: pageNumber,
       pageSize: pageSize,
       totalCount: userCountDocument,
       items: users,
     };
-    return result;
   }
 }

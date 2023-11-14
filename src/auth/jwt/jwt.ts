@@ -9,25 +9,28 @@ export class JwtService {
   private accessJwtSecret = this.configService.get('jwt_access_secret');
   private refreshJwtToken = this.configService.get('jwt_refresh_secret');
 
-  async createAccessToken(userId: string) {
-    const accessToken: string = jwt.sign({ userId }, this.accessJwtSecret, {
+  async createAccessAndRefreshToken(deviceId: string, userId: string) {
+    const accessToken = jwt.sign({ userId }, this.accessJwtSecret, {
       expiresIn: '30m',
     });
-    return accessToken;
-  }
-  async createRefreshToken(deviceId: string, userId: string) {
-    const refreshToken: string = jwt.sign(
-      { userId, deviceId },
-      this.refreshJwtToken,
-      {
-        expiresIn: '30m',
-      },
-    );
-    return refreshToken;
+
+    const refreshToken = jwt.sign({ userId, deviceId }, this.refreshJwtToken, {
+      expiresIn: '30m',
+    });
+    return { accessToken, refreshToken };
   }
 
   async getLastActiveDateFromToken(token: string) {
     const result: any = await jwt.decode(token);
     return new Date(result.iat * 1000).toISOString();
+  }
+
+  async verifyRefreshToken(token: string) {
+    try {
+      const res: any = await jwt.verify(token, this.refreshJwtToken);
+      return { userId: res.userId, deviceId: res.deviceId };
+    } catch (e) {
+      return null;
+    }
   }
 }
