@@ -64,4 +64,24 @@ export class UserService {
   async findUserId(userId: string): Promise<UserViewModels | null> {
     return this.userRepository.findUserId(userId);
   }
+
+  async findUserByLoginOrEmail(
+    loginOrEmail: string,
+  ): Promise<UserEntity | null> {
+    return this.userRepository.findUserByLoginOrEmail(loginOrEmail);
+  }
+
+  async updateUserByConfirmationCode(userId: string) {
+    return this.userRepository.updateUserByConfirmationCode(userId);
+  }
+
+  async findUserByConfirmationCode(code: string) {
+    return this.userRepository.findUserByConfirmationCode(code);
+  }
+
+  async updateUserPassword(userId: string, newPassword: string) {
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+    return this.userRepository.updateUserPassword(userId, passwordHash);
+  }
 }

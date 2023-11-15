@@ -6,6 +6,9 @@ import { JwtService } from '../jwt/jwt';
 import { Device } from '../../security-devices/models/device.schema';
 import { SecurityDevicesService } from '../../security-devices/infractructure/security-devices.service';
 import { DeviceDto } from '../../security-devices/dto/device.dto';
+import { RegistrationDto } from '../dto/registration.dto';
+import { EmailService } from '../../email/email.service';
+import { NewPasswordDto } from '../dto/newpassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +16,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly securityDevicesService: SecurityDevicesService,
+    private readonly emailService: EmailService,
   ) {}
 
   async login(loginDto: LoginDto, ip: string, deviceName: string) {
@@ -70,5 +74,49 @@ export class AuthService {
     );
 
     return { accessToken, refreshToken };
+  }
+
+  async registration(registrationDto: RegistrationDto) {
+    const newUser = await this.userService.createUser(registrationDto);
+    await this.emailService.sendEmail(
+      registrationDto.email,
+      'Registration',
+      `<h1>Registation</h1>
+            <p>To finish registration please follow the link below:
+             <a href="https://somesite.com/confirm-email?code=${
+               newUser!.emailConfirmation.codeConfirmation
+             }">complete registration</a>
+            </p>`,
+    );
+    return;
+  }
+
+  async passwordRecovery(email: string) {
+    const userEmail = await this.userService.findUserByLoginOrEmail(email);
+    if (!userEmail) return null;
+    const updateUser = await this.userService.updateUserByConfirmationCode(
+      userEmail.id,
+    );
+    await this.emailService.sendEmail(
+      email,
+      'Email resending conformation',
+      `<h1>Password recovery confirmation</h1>
+            <p>To finish password recovery please follow the link below:
+             <a href='https://somesite.com/password-recovery?recoveryCode=${
+               updateUser!.emailConfirmation.codeConfirmation
+             }'>recovery password</a></p>`,
+    );
+
+    return;
+  }
+  async newPassword(newPasswordDto: NewPasswordDto) {
+    const user = await this.userService.findUserByConfirmationCode(
+      newPasswordDto.recoveryCode,
+    );
+    if (!user) return null;
+    await this.userService.updateUserPassword(
+      user.id,
+      newPasswordDto.newPassword,
+    );
   }
 }

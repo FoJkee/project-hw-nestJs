@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserEntity, UserDocument } from '../models/user.schema';
 import { Model } from 'mongoose';
 import { UserViewModels } from '../models/user.view.models';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserRepository {
@@ -46,6 +47,29 @@ export class UserRepository {
         $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
       },
       { _id: 0, __v: 0 },
+    );
+  }
+  async updateUserByConfirmationCode(userId: string) {
+    return this.UserModel.findOneAndUpdate(
+      { id: userId },
+      {
+        $set: {
+          'emailConfirmation.codeConfirmation': randomUUID(),
+          'emailConfirmation.isConfirmed': false,
+        },
+      },
+    );
+  }
+  async findUserByConfirmationCode(code: string) {
+    return this.UserModel.findOne({
+      'emailConfirmation.codeConfirmation': code,
+      'emailConfirmation.isConfirmed': false,
+    });
+  }
+  async updateUserPassword(userId: string, passwordHash: string) {
+    return this.UserModel.findOneAndUpdate(
+      { userId },
+      { $set: { passwordHash } },
     );
   }
 }

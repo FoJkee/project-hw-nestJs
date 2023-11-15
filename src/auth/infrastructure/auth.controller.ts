@@ -22,16 +22,13 @@ import {
   RefreshTokenDecorator,
 } from '../../decorators/refreshtoken.decorator';
 import { DeviceDto } from '../../security-devices/dto/device.dto';
-import { JwtService } from '../jwt/jwt';
-import { SecurityDevicesService } from '../../security-devices/infractructure/security-devices.service';
+import { RegistrationDto } from '../dto/registration.dto';
+import { PasswordRecoveryDto } from '../dto/password-recovery.dto';
+import { NewPasswordDto } from '../dto/newpassword.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
-    private readonly securityDevicesService: SecurityDevicesService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @HttpCode(200)
@@ -100,9 +97,31 @@ export class AuthController {
       throw new UnauthorizedException();
     }
   }
+
+  @Post('registration')
+  @HttpCode(204)
+  async registration(@Body() registrationDto: RegistrationDto) {
+    return this.authService.registration(registrationDto);
+  }
+
+  @Post('password-recovery')
+  @HttpCode(204)
+  async passwordRecovery(@Body() passwordRecoveryDto: PasswordRecoveryDto) {
+    return this.authService.passwordRecovery(passwordRecoveryDto.email);
+  }
+
+  @Post('new-password')
+  @HttpCode(204)
+  async newPassword(@Body() newPasswordDto: NewPasswordDto) {
+    return this.authService.newPassword(newPasswordDto);
+  }
+
+  @Post('registration-conformation')
+  @HttpCode(204)
+  async registrationConformation() {}
 }
 
-// @Post('logout')
+// @Post('refresh-token')
 // async refreshToken(@RefreshToken() token: string) {
 //   const dataToken = await this.jwtService.verifyRefreshToken(token);
 //   if (!dataToken) throw new UnauthorizedException();
