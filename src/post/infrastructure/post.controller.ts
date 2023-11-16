@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreatePostDto } from '../dto/post.dto';
 import { PostService } from './post.service';
@@ -22,6 +23,8 @@ import { User } from '../../decorators/user.decorator';
 import { UserEntity } from '../../user/models/user.schema';
 import { Reaction } from '../../reaction/dto/reaction.dto';
 import { UserId } from '../../decorators/userId.decorator';
+import { BasicAuthGuard } from '../../guard/basic.auth.guard';
+import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 
 @Controller('posts')
 export class PostController {
@@ -60,6 +63,7 @@ export class PostController {
     }
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put(':postId')
   @HttpCode(204)
   async updatePost(
@@ -73,6 +77,7 @@ export class PostController {
     }
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete(':postId')
   @HttpCode(204)
   async deletePostId(@Param('postId') postId: string): Promise<boolean> {
@@ -91,6 +96,7 @@ export class PostController {
     return this.postService.getCommentForPost(queryDto, postId);
   }
 
+  @UseGuards(BearerAuthGuard)
   @Post(':postId/comments')
   async createCommentForPost(
     @Param('postId') postId: string,
@@ -103,7 +109,7 @@ export class PostController {
       createCommentDto,
     );
   }
-
+  @UseGuards(BearerAuthGuard)
   @Put(':postId/like-status')
   async updatePostIdLikeStatus(
     @Param('postId') postId: string,

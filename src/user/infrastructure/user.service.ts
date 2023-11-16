@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserDto } from '../dto/user.dto';
 import { UserEntity } from '../models/user.schema';
 import bcrypt from 'bcrypt';
@@ -77,6 +81,12 @@ export class UserService {
 
   async findUserByConfirmationCode(code: string) {
     return this.userRepository.findUserByConfirmationCode(code);
+  }
+  async findUserAndUpdateByConfirmationCode(code: string) {
+    const user = await this.userRepository.findUserByConfirmationCode(code);
+    if (!user) throw new BadRequestException();
+    if (user.emailConfirmation.isConfirmed) throw new BadRequestException();
+    await this.userRepository.findUserAndUpdateByConfirmationCode(user.id);
   }
 
   async updateUserPassword(userId: string, newPassword: string) {

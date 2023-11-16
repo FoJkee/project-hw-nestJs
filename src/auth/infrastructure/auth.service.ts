@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { UserService } from '../../user/infrastructure/user.service';
 import { randomUUID } from 'crypto';
@@ -118,5 +122,30 @@ export class AuthService {
       user.id,
       newPasswordDto.newPassword,
     );
+  }
+
+  async registrationConfirmation(code: string) {
+    return this.userService.findUserAndUpdateByConfirmationCode(code);
+  }
+
+  async registrationEmailResending(email: string) {
+    const userEmail = await this.userService.findUserByLoginOrEmail(email);
+    if (!userEmail) throw new BadRequestException();
+
+    const updateUser = await this.userService.updateUserByConfirmationCode(
+      userEmail.id,
+    );
+
+    await this.emailService.sendEmail(
+      email,
+      'Email resending confirmation',
+      `<h1>Email resending confirmation</h1>
+            <p>To finish email resending please follow the link below:
+             <a href='https://somesite.com/confirm-email?code=${
+               updateUser!.emailConfirmation.codeConfirmation
+             }'>complete registration</a>
+            </p>`,
+    );
+    return;
   }
 }

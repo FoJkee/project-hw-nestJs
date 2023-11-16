@@ -33,4 +33,13 @@ export class JwtService {
       return null;
     }
   }
+
+  async verifyAccessToken(token: string) {
+    try {
+      const res: any = await jwt.verify(token, this.accessJwtSecret);
+      return { userId: res.userId };
+    } catch (e) {
+      return null;
+    }
+  }
 }

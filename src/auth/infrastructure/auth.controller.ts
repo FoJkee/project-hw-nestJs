@@ -25,6 +25,9 @@ import { DeviceDto } from '../../security-devices/dto/device.dto';
 import { RegistrationDto } from '../dto/registration.dto';
 import { PasswordRecoveryDto } from '../dto/password-recovery.dto';
 import { NewPasswordDto } from '../dto/newpassword.dto';
+import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dto';
+import { RegistrationEmailResending } from '../dto/registration.email.resending';
+import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -69,7 +72,9 @@ export class AuthController {
     }
   }
 
+  @UseGuards(BearerAuthGuard)
   @Get('me')
+  @HttpCode(200)
   async me(@User() user: UserEntity) {
     return {
       email: user.email,
@@ -116,9 +121,25 @@ export class AuthController {
     return this.authService.newPassword(newPasswordDto);
   }
 
-  @Post('registration-conformation')
+  @Post('registration-confirmation')
   @HttpCode(204)
-  async registrationConformation() {}
+  async registrationConfirmation(
+    @Body() registrationConfirmationDto: RegistrationConfirmationDto,
+  ) {
+    return this.authService.registrationConfirmation(
+      registrationConfirmationDto.code,
+    );
+  }
+
+  @Post('registration-email-resending')
+  @HttpCode(204)
+  async registrationEmailResending(
+    @Body() registrationEmailResending: RegistrationEmailResending,
+  ) {
+    return this.authService.registrationEmailResending(
+      registrationEmailResending.email,
+    );
+  }
 }
 
 // @Post('refresh-token')

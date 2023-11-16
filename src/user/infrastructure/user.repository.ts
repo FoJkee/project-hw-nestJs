@@ -63,13 +63,19 @@ export class UserRepository {
   async findUserByConfirmationCode(code: string) {
     return this.UserModel.findOne({
       'emailConfirmation.codeConfirmation': code,
-      'emailConfirmation.isConfirmed': false,
     });
   }
   async updateUserPassword(userId: string, passwordHash: string) {
     return this.UserModel.findOneAndUpdate(
       { userId },
       { $set: { passwordHash } },
+    );
+  }
+
+  async findUserAndUpdateByConfirmationCode(userId: string) {
+    return this.UserModel.findOneAndUpdate(
+      { userId },
+      { 'emailConfirmation.isConfirmed': true },
     );
   }
 }
