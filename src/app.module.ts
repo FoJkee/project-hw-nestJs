@@ -9,12 +9,10 @@ import { UserModule } from './user/user.module';
 import { AuthService } from './auth/infrastructure/auth.service';
 import { AuthController } from './auth/infrastructure/auth.controller';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SecurityDevicesService } from './security-devices/infractructure/security-devices.service';
 import configuration from './config/configuration';
-
-import dotenv from 'dotenv';
-dotenv.config();
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -22,6 +20,14 @@ dotenv.config();
       isGlobal: true,
       load: [configuration],
     }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get('mongo_uri'),
+      }),
+    }),
+
     BlogModule,
     TestingModule,
     PostModule,
