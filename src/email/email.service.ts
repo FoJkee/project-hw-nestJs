@@ -1,11 +1,13 @@
 import nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class EmailService {
   constructor(private readonly configService: ConfigService) {}
 
-  private email = this.configService.get('EMAIL');
-  private pass = this.configService.get('PASS');
+  private email = this.configService.get('email', 'email');
+  private pass = this.configService.get('pass', 'email');
 
   async sendEmail(email: string, subject: string, message: string) {
     const transporter = await nodemailer.createTransport({

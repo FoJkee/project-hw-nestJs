@@ -7,12 +7,19 @@ import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { UserModule } from './user/user.module';
 import { AuthService } from './auth/infrastructure/auth.service';
-import { AuthController } from './auth/infrastructure/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SecurityDevicesService } from './security-devices/infractructure/security-devices.service';
 import configuration from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
+import { SecurityDevicesModule } from './security-devices/security-devices.module';
+import { UserService } from './user/infrastructure/user.service';
+import { JwtService } from './auth/jwt/jwt';
+import { SecurityDevicesService } from './security-devices/infractructure/security-devices.service';
+import { EmailService } from './email/email.service';
+import { UserRepository } from './user/infrastructure/user.repository';
+import { UserQueryRepository } from './user/infrastructure/user.query.repository';
+import { SecurityDevicesRepository } from './security-devices/infractructure/security-devices.repository';
+import { UserEntity, UserSchema } from './user/models/user.schema';
 
 @Module({
   imports: [
@@ -24,18 +31,29 @@ import { MongooseModule } from '@nestjs/mongoose';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get('mongo_uri'),
+        uri: configService.get<string>('mongo_uri'),
       }),
     }),
-
+    MongooseModule.forFeature([{ name: UserEntity.name, schema: UserSchema }]),
     BlogModule,
     TestingModule,
     PostModule,
     CommentModule,
     UserModule,
     AuthModule,
+    SecurityDevicesModule,
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, SecurityDevicesService],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    AuthService,
+    UserService,
+    JwtService,
+    SecurityDevicesService,
+    EmailService,
+    UserRepository,
+    UserQueryRepository,
+    SecurityDevicesRepository,
+  ],
 })
 export class AppModule {}

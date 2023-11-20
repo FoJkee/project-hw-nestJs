@@ -8,6 +8,6 @@ export default () => ({
 
   jwt_access_secret: process.env.JWT_ACCESS_SECRET || '123',
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET || '123',
-  EMAIL: process.env.EMAIL,
-  PASS: process.env.PASS,
+  email: process.env.EMAIL,
+  pass: process.env.PASS,
 });
