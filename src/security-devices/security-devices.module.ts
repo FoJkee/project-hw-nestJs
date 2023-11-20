@@ -9,6 +9,7 @@ import { Device, DeviceSchema } from './models/device.schema';
   imports: [
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
   ],
+
   providers: [SecurityDevicesService, SecurityDevicesRepository],
   controllers: [SecurityDevicesController],
 })

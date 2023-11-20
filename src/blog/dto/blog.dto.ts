@@ -1,4 +1,4 @@
-import { IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsString, MaxLength } from 'class-validator';
 
 export class CreateBlogDto {
   @IsString()
@@ -8,7 +8,6 @@ export class CreateBlogDto {
   @MaxLength(500)
   description: string;
   @IsString()
-  @IsUrl()
   @MaxLength(100)
   websiteUrl: string;
 }

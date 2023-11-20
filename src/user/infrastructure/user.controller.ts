@@ -20,15 +20,16 @@ import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(BasicAuthGuard)
+  // @UseGuards(BasicAuthGuard)
   @Get()
   async getUser(
     @Query() userQueryDto: UserQueryDto,
   ): Promise<PaginationView<UserViewModels[]>> {
     return this.userService.getUser(userQueryDto);
   }
-  @UseGuards(BasicAuthGuard)
+
   @Post()
+  @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   async createUser(@Body() userDto: UserDto): Promise<UserViewModels | null> {
     return this.userService.createUser(userDto);

@@ -6,8 +6,8 @@ import { Injectable } from '@nestjs/common';
 export class EmailService {
   constructor(private readonly configService: ConfigService) {}
 
-  private email = this.configService.get('email', 'email');
-  private pass = this.configService.get('pass', 'email');
+  private email = this.configService.get('email');
+  private pass = this.configService.get('pass');
 
   async sendEmail(email: string, subject: string, message: string) {
     const transporter = await nodemailer.createTransport({

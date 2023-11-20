@@ -36,11 +36,9 @@ export class UserQueryRepository {
     }
     // if (searchEmailTerm) {
     //   filter.email = { $regex: searchEmailTerm, $options: 'i' };
-    //   return;
     // }
     // if (searchLoginTerm) {
     //   filter.login = { $regex: searchLoginTerm, $options: 'i' };
-    //   return
     // }
 
     const users = await this.UserModel.find(filter, {
