@@ -23,10 +23,15 @@ export class SecurityDevicesService {
     return this.securityDevicesRepository.getDeviceAllSessionUserId(userId);
   }
 
-  async deleteDeviceSessionUserId(deviceId: string, userId: string) {
+  async deleteDeviceSessionUserId(
+    deviceId: string,
+    userId: string,
+    lastActiveDate: string,
+  ) {
     return this.securityDevicesRepository.deleteDeviceSessionUserId(
       deviceId,
       userId,
+      lastActiveDate,
     );
   }
 

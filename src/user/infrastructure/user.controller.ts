@@ -16,26 +16,27 @@ import { UserViewModels } from '../models/user.view.models';
 import { UserDto } from '../dto/user.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 
-@Controller('users')
+@Controller('sa')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @UseGuards(BasicAuthGuard)
-  @Get()
+  @Get('/users')
+  @UseGuards(BasicAuthGuard)
+  @HttpCode(200)
   async getUser(
     @Query() userQueryDto: UserQueryDto,
   ): Promise<PaginationView<UserViewModels[]>> {
     return this.userService.getUser(userQueryDto);
   }
 
-  @Post()
+  @Post('/users')
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   async createUser(@Body() userDto: UserDto): Promise<UserViewModels | null> {
     return this.userService.createUser(userDto);
   }
+  @Delete('/users/:userId')
   @UseGuards(BasicAuthGuard)
-  @Delete(':userId')
   @HttpCode(204)
   async deleteUserId(@Param('userId') userId: string) {
     return this.userService.deleteUserId(userId);

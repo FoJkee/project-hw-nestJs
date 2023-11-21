@@ -14,8 +14,16 @@ export class SecurityDevicesRepository {
   async getDeviceId(deviceId: string): Promise<Device | null> {
     return this.DeviceModel.findOne({ id: deviceId });
   }
-  async deleteDeviceSessionUserId(deviceId: string, userId: string) {
-    return this.DeviceModel.findOneAndDelete({ deviceId, userId });
+  async deleteDeviceSessionUserId(
+    deviceId: string,
+    userId: string,
+    lastActiveDate: string,
+  ) {
+    return this.DeviceModel.findOneAndDelete({
+      deviceId,
+      userId,
+      lastActiveDate,
+    });
   }
 
   async getDeviceAllSessionUserId(userId: string): Promise<DeviceViewModels[]> {

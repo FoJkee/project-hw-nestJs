@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '../auth/jwt/jwt';
+import { JwtServices } from '../auth/jwt/jwt';
 import { UserService } from '../user/infrastructure/user.service';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtServices,
     private readonly userService: UserService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,9 +22,9 @@ export class BearerAuthGuard implements CanActivate {
 
     const jwtPayload = await this.jwtService.verifyAccessToken(token);
     if (!jwtPayload) throw new UnauthorizedException();
-    const userId = await this.userService.findUserId(jwtPayload.userId);
-    if (!userId) throw new UnauthorizedException();
-    request.userId = userId;
+    const user = await this.userService.findUserId(jwtPayload.userId);
+    if (!user) throw new UnauthorizedException();
+    request.user = user;
     return true;
   }
 }

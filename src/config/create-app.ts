@@ -7,8 +7,8 @@ import { AppModule } from '../app.module';
 export const createApp = (app: INestApplication): INestApplication => {
   app.enableCors();
   app.use(cookieParser());
-  app.useGlobalPipes(GlobalValidationPipe);
-  app.useGlobalFilters();
+  // app.useGlobalPipes(GlobalValidationPipe);
+  // app.useGlobalFilters();
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   return app;

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './infrastructure/auth.controller';
 import { AuthService } from './infrastructure/auth.service';
 import { UserService } from '../user/infrastructure/user.service';
-import { JwtService } from './jwt/jwt';
+import { JwtServices } from './jwt/jwt';
 import { UserRepository } from '../user/infrastructure/user.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserEntity, UserSchema } from '../user/models/user.schema';
@@ -21,7 +21,7 @@ import { SecurityDevicesRepository } from '../security-devices/infractructure/se
     AuthService,
     UserService,
     UserRepository,
-    JwtService,
+    JwtServices,
     EmailService,
     SecurityDevicesService,
     UserQueryRepository,

@@ -26,14 +26,16 @@ export class UserQueryRepository {
       ? userQueryDto.searchLoginTerm.toString()
       : '';
 
-    const filter: any = {};
-
-    if (searchEmailTerm && searchLoginTerm) {
-      filter.$or = [
+    const filter = {
+      $or: [
         { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
+
         { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
-      ];
-    }
+      ],
+    };
+
+    // if (searchEmailTerm && searchLoginTerm) {
+    // }
     // if (searchEmailTerm) {
     //   filter.email = { $regex: searchEmailTerm, $options: 'i' };
     // }

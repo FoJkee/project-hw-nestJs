@@ -28,10 +28,16 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dto';
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
+import { UserService } from '../../user/infrastructure/user.service';
+import { JwtServices } from '../jwt/jwt';
 
-@Controller('auth')
+@Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtServices,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -56,26 +62,10 @@ export class AuthController {
     }
   }
 
-  @UseGuards(RefreshTokenGuard)
-  @Post('logout')
-  @HttpCode(204)
-  async logout(
-    @Res({ passthrough: true }) res: Response,
-    @User() user: UserEntity,
-    @RefreshTokenDecorator() deviceDto: DeviceDto,
-  ) {
-    try {
-      await this.authService.logout(deviceDto, user.id);
-      return res.clearCookie('refreshToken');
-    } catch (e) {
-      throw new UnauthorizedException();
-    }
-  }
-
+  @Get('/me')
   @UseGuards(BearerAuthGuard)
-  @Get('me')
   @HttpCode(200)
-  async me(@User() user: UserEntity) {
+  async aboutMe(@User() user: UserEntity) {
     return {
       email: user.email,
       login: user.login,
@@ -83,12 +73,38 @@ export class AuthController {
     };
   }
 
+  @Post('/logout')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(204)
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @User() user: UserEntity,
+    @RefreshTokenDecorator() deviceDto: DeviceDto,
+  ) {
+    const logout = await this.authService.logout(deviceDto, user.id);
+    console.log('logout', logout);
+    return res.clearCookie('refreshToken');
+  }
+
+  // @Post('/logout')
+  // @HttpCode(204)
+  // async logout(
+  //   @RefreshToken() token: string,
+  //   @User() user: UserEntity,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const dataToken = this.jwtService.verifyRefreshToken(token);
+  //   console.log('dataToken', dataToken);
+  //   if (!dataToken) throw new UnauthorizedException();
+  //   await this.authService.logout(dataToken.deviceId, user.id);
+  //   return res.clearCookie('refreshToken');
+  // }
+
   @Post('refresh-token')
-  async refreshToken(
+  async refresh_Token(
     @RefreshToken() token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    if (!token) throw new UnauthorizedException();
     try {
       const { accessToken, refreshToken } =
         await this.authService.refreshToken(token);
@@ -97,7 +113,7 @@ export class AuthController {
         httpOnly: true,
         secure: true,
       });
-      return { accessToken };
+      return { accessToken: accessToken };
     } catch (e) {
       throw new UnauthorizedException();
     }

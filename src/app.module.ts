@@ -6,7 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from './user/infrastructure/user.service';
-import { JwtService } from './auth/jwt/jwt';
 import { SecurityDevicesService } from './security-devices/infractructure/security-devices.service';
 import { EmailService } from './email/email.service';
 import { UserRepository } from './user/infrastructure/user.repository';
@@ -38,6 +37,8 @@ import { Reaction, ReactionSchema } from './reaction/models/reaction.schema';
 import { MongooseConfigService } from './config/mongoose.config';
 import { BasicAuthGuard } from './guard/basic.auth.guard';
 import { EmailValidator, LoginValidator } from './user/dto/user.validator';
+import { JwtService } from '@nestjs/jwt';
+import { JwtServices } from './auth/jwt/jwt';
 
 const repositories = [
   BlogRepository,
@@ -53,7 +54,7 @@ const repositories = [
 
 const services = [
   AuthService,
-  JwtService,
+  JwtServices,
   BlogService,
   CommentService,
   EmailService,

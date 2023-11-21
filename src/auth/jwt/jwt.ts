@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class JwtService {
+export class JwtServices {
   constructor(private readonly configService: ConfigService) {}
 
   private accessJwtSecret = this.configService.get('jwt_access_secret');
@@ -25,9 +25,9 @@ export class JwtService {
     return new Date(result.iat * 1000).toISOString();
   }
 
-  async verifyRefreshToken(token: string) {
+  async verifyRefreshToken(refreshToken: string) {
     try {
-      const res: any = await jwt.verify(token, this.refreshJwtToken);
+      const res: any = await jwt.verify(refreshToken, this.refreshJwtToken);
       return { userId: res.userId, deviceId: res.deviceId };
     } catch (e) {
       return null;
@@ -43,3 +43,8 @@ export class JwtService {
     }
   }
 }
+
+type TokenPayload = {
+  userId: string;
+  deviceId: string;
+};

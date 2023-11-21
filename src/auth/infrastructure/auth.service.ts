@@ -6,7 +6,7 @@ import {
 import { LoginDto } from '../dto/login.dto';
 import { UserService } from '../../user/infrastructure/user.service';
 import { randomUUID } from 'crypto';
-import { JwtService } from '../jwt/jwt';
+import { JwtServices } from '../jwt/jwt';
 import { Device } from '../../security-devices/models/device.schema';
 import { SecurityDevicesService } from '../../security-devices/infractructure/security-devices.service';
 import { DeviceDto } from '../../security-devices/dto/device.dto';
@@ -18,7 +18,7 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtServices,
     private readonly securityDevicesService: SecurityDevicesService,
     private readonly emailService: EmailService,
   ) {}
@@ -49,25 +49,25 @@ export class AuthService {
   }
 
   async logout(deviceDto: DeviceDto, userId: string) {
+    const lastActiveDate = new Date(deviceDto.iat * 1000).toISOString();
+
     return this.securityDevicesService.deleteDeviceSessionUserId(
       deviceDto.deviceId,
       userId,
+      lastActiveDate,
     );
   }
 
   async refreshToken(token: string) {
     const dataToken = await this.jwtService.verifyRefreshToken(token);
     if (!dataToken) throw new UnauthorizedException();
-    // const userId = dataToken.userId;
-    // const deviceId = dataToken.deviceId;
+    const userId = dataToken.userId;
+    const deviceId = dataToken.deviceId;
     const user = await this.userService.findUserId(dataToken.userId);
     if (!user) throw new UnauthorizedException();
 
     const { accessToken, refreshToken } =
-      await this.jwtService.createAccessAndRefreshToken(
-        dataToken.deviceId,
-        dataToken.userId,
-      );
+      await this.jwtService.createAccessAndRefreshToken(deviceId, userId);
 
     const newDataToken =
       await this.jwtService.getLastActiveDateFromToken(refreshToken);
