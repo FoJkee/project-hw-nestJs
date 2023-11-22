@@ -38,7 +38,7 @@ import { MongooseConfigService } from './config/mongoose.config';
 import { BasicAuthGuard } from './guard/basic.auth.guard';
 import { EmailValidator, LoginValidator } from './user/dto/user.validator';
 import { JwtService } from '@nestjs/jwt';
-import { JwtServices } from './auth/jwt/jwt';
+import { JwtServicess } from './auth/jwt/jwt';
 
 const repositories = [
   BlogRepository,
@@ -54,7 +54,7 @@ const repositories = [
 
 const services = [
   AuthService,
-  JwtServices,
+  JwtServicess,
   BlogService,
   CommentService,
   EmailService,
@@ -63,6 +63,7 @@ const services = [
   TestingService,
   UserService,
   AppService,
+  JwtService,
 ];
 
 const settings = [BasicAuthGuard, LoginValidator, EmailValidator];

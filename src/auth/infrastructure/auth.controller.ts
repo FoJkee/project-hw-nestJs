@@ -5,6 +5,7 @@ import {
   HttpCode,
   Ip,
   Post,
+  Req,
   Res,
   UnauthorizedException,
   UseGuards,
@@ -12,7 +13,7 @@ import {
 
 import { LoginDto } from '../dto/login.dto';
 import { DeviceName } from '../../decorators/deviceName.decorator';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RefreshTokenGuard } from '../../guard/refreshToken.guard';
 import { UserEntity } from '../../user/models/user.schema';
@@ -28,16 +29,10 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dto';
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
-import { UserService } from '../../user/infrastructure/user.service';
-import { JwtServices } from '../jwt/jwt';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-    private readonly jwtService: JwtServices,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @HttpCode(200)
@@ -78,12 +73,17 @@ export class AuthController {
   @HttpCode(204)
   async logout(
     @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
     @User() user: UserEntity,
     @RefreshTokenDecorator() deviceDto: DeviceDto,
+    //@CurrentUserIdAndDeviceId() dto : {userId: string, deviceId: string}
   ) {
-    const logout = await this.authService.logout(deviceDto, user.id);
-    console.log('logout', logout);
-    return res.clearCookie('refreshToken');
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) throw new UnauthorizedException();
+    const result = await this.authService.logout(deviceDto.deviceId, user.id);
+    if (!result) throw new UnauthorizedException();
+    res.clearCookie('refreshToken');
+    return;
   }
 
   // @Post('/logout')
@@ -93,10 +93,10 @@ export class AuthController {
   //   @User() user: UserEntity,
   //   @Res({ passthrough: true }) res: Response,
   // ) {
-  //   const dataToken = this.jwtService.verifyRefreshToken(token);
+  //   const dataToken = await this.jwtService.verifyRefreshToken(token);
   //   console.log('dataToken', dataToken);
   //   if (!dataToken) throw new UnauthorizedException();
-  //   await this.authService.logout(dataToken.deviceId, user.id);
+  //   await this.authService.logout(dataToken.deviceId, dataToken.userId);
   //   return res.clearCookie('refreshToken');
   // }
 

@@ -5,13 +5,12 @@ const errorResult = (errors: ValidationError[]) => {
   const result: any = [];
   errors.forEach((err) => {
     const keys: string[] = Object.keys(err.constraints!);
-    keys.forEach((e) => {
-      result.push({
-        message: err.constraints![e],
-        field: err.property,
-      });
+    result.push({
+      message: err.constraints![keys[0]],
+      field: err.property,
     });
   });
+
   return result;
 };
 

@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtServices } from '../auth/jwt/jwt';
+import { JwtServicess } from '../auth/jwt/jwt';
 import { UserService } from '../user/infrastructure/user.service';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
   constructor(
-    private readonly jwtService: JwtServices,
+    private readonly jwtService: JwtServicess,
     private readonly userService: UserService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {

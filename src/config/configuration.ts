@@ -9,6 +9,4 @@ export default () => ({
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
   email: process.env.EMAIL,
   pass: process.env.PASS,
-  // basic_user: process.env.BASIC_USER,
-  // basic_pass: process.env.BASIC_PASS,
 });

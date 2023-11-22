@@ -42,7 +42,7 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    const result = await this.userRepository.createUser({ ...newUser });
+    const result = await this.userRepository.createUser(newUser);
     if (!result) throw new NotFoundException();
     return result;
   }

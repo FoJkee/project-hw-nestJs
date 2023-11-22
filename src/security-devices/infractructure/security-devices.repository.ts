@@ -12,22 +12,24 @@ export class SecurityDevicesRepository {
   ) {}
 
   async getDeviceId(deviceId: string): Promise<Device | null> {
-    return this.DeviceModel.findOne({ id: deviceId });
+    return this.DeviceModel.findOne({ deviceId });
   }
   async deleteDeviceSessionUserId(
     deviceId: string,
     userId: string,
-    lastActiveDate: string,
+    // lastActiveDate: string,
   ) {
     return this.DeviceModel.findOneAndDelete({
       deviceId,
       userId,
-      lastActiveDate,
+      // lastActiveDate,
     });
   }
 
-  async getDeviceAllSessionUserId(userId: string): Promise<DeviceViewModels[]> {
-    return this.DeviceModel.find({ userId }, { _id: 0 });
+  async getDeviceAllSessionUserId(
+    userId: string,
+  ): Promise<DeviceViewModels[] | null> {
+    return this.DeviceModel.findOne({ userId }, { _id: 0 });
   }
   async createNewDevice(
     newDevice: DeviceViewModels,
