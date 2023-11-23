@@ -9,7 +9,6 @@ import { randomUUID } from 'crypto';
 import { JwtServicess } from '../jwt/jwt';
 import { Device } from '../../security-devices/models/device.schema';
 import { SecurityDevicesService } from '../../security-devices/infractructure/security-devices.service';
-import { DeviceDto } from '../../security-devices/dto/device.dto';
 import { RegistrationDto } from '../dto/registration.dto';
 import { EmailService } from '../../email/email.service';
 import { NewPasswordDto } from '../dto/newpassword.dto';

@@ -15,22 +15,18 @@ export class JwtServicess {
   async createAccessAndRefreshToken(deviceId: string, userId: string) {
     const accessToken = this.jwtService.sign(
       { userId },
-      { secret: this.accessJwtSecret, expiresIn: '30000000s' },
+      { secret: this.accessJwtSecret, expiresIn: '2h' },
     );
-
     const refreshToken = this.jwtService.sign(
       { userId, deviceId },
 
-      {
-        expiresIn: '30000000s',
-        secret: this.refreshJwtToken,
-      },
+      { secret: this.refreshJwtToken, expiresIn: '2h' },
     );
     return { accessToken, refreshToken };
   }
 
   async getLastActiveDateFromToken(token: string) {
-    const result: any = await this.jwtService.decode(token);
+    const result: any = this.jwtService.decode(token);
     return new Date(result.iat * 1000).toISOString();
   }
 

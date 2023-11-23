@@ -29,6 +29,5 @@ export const pagination = (queryDto: QueryDto) => {
     queryDto.sortDirection && queryDto.sortDirection.toString() === 'asc'
       ? 'asc'
       : 'desc';
-
   return { sortBy, pageSize, pageNumber, sortDirection };
 };

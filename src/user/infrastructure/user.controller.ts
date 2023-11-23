@@ -20,8 +20,8 @@ import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/users')
   @UseGuards(BasicAuthGuard)
+  @Get('/users')
   @HttpCode(200)
   async getUser(
     @Query() userQueryDto: UserQueryDto,

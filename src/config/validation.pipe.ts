@@ -1,24 +1,20 @@
-import { ValidationError } from 'class-validator';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-
-const errorResult = (errors: ValidationError[]) => {
-  const result: any = [];
-  errors.forEach((err) => {
-    const keys: string[] = Object.keys(err.constraints!);
-    result.push({
-      message: err.constraints![keys[0]],
-      field: err.property,
-    });
-  });
-
-  return result;
-};
 
 export const GlobalValidationPipe = new ValidationPipe({
   whitelist: true,
   transform: true,
   stopAtFirstError: true,
-  exceptionFactory: (errors: ValidationError[]) => {
-    throw new BadRequestException(errorResult(errors));
+  exceptionFactory: (errors) => {
+    const result: any = [];
+    errors.forEach((err) => {
+      const keys = Object.keys(err.constraints!);
+      keys.forEach((e) => {
+        result.push({
+          message: err.constraints![e],
+          field: err.property,
+        });
+      });
+    });
+    throw new BadRequestException(result);
   },
 });

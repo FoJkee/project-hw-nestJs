@@ -2,9 +2,9 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class UserQueryDto {
   @IsString()
-  searchLoginTerm: string | null = '';
+  searchLoginTerm: string = '';
   @IsString()
-  searchEmailTerm: string | null = '';
+  searchEmailTerm: string = '';
   @IsString()
   sortBy: string = 'createdAt';
   @IsString()
