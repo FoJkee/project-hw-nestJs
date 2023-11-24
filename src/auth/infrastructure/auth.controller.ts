@@ -78,7 +78,7 @@ export class AuthController {
     @RefreshTokenDecorator() deviceDto: DeviceDto,
     //@CurrentUserIdAndDeviceId() dto : {userId: string, deviceId: string}
   ) {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.user;
     if (!refreshToken) throw new UnauthorizedException();
     const result = await this.authService.logout(deviceDto.deviceId, user.id);
     if (!result) throw new UnauthorizedException();

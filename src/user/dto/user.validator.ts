@@ -21,7 +21,7 @@ export class LoginValidator implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return `This login doesn't exist`;
+    return `Login exist`;
   }
 }
 
@@ -41,6 +41,6 @@ export class EmailValidator implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return `Email doesn't exist`;
+    return `Email exist`;
   }
 }

@@ -79,21 +79,27 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async registration(
-    registrationDto: RegistrationDto,
-  ): Promise<UserViewModels | null> {
+  async registration(registrationDto: RegistrationDto) {
     const newUser = await this.userService.createUser(registrationDto);
-    if (newUser) {
-      await this.emailService.sendEmail(
-        registrationDto.email,
-        'Registration',
-        `<h1>Registation</h1>
+    if (!newUser) return false;
+
+    const codeConfirmation =
+      newUser.emailConfirmation?.codeConfirmation ?? randomUUID();
+    // console.log('codeConfirmation', codeConfirmation);
+
+    await this.emailService.sendEmail(
+      newUser.email,
+      'Registration',
+      `<h1>Registation</h1>
             <p>To finish registration please follow the link below:
-             <a href="https://somesite.com/confirm-email?code=${newUser.emailConfirmation?.codeConfirmation}">complete registration</a>
+             <a href="https://somesite.com/confirm-email?code=${codeConfirmation}">complete registration</a>
             </p>`,
-      );
-    }
-    return newUser;
+    );
+
+    return true;
+  }
+  async registrationConfirmation(code: string) {
+    return this.userService.findUserAndUpdateByConfirmationCode(code);
   }
 
   async passwordRecovery(email: string) {
@@ -126,10 +132,6 @@ export class AuthService {
     );
   }
 
-  async registrationConfirmation(code: string) {
-    return this.userService.findUserAndUpdateByConfirmationCode(code);
-  }
-
   async registrationEmailResending(email: string) {
     const userEmail = await this.userService.findUserByLoginOrEmail(email);
     if (!userEmail) throw new BadRequestException();
@@ -137,7 +139,6 @@ export class AuthService {
     const updateUser = await this.userService.updateUserByConfirmationCode(
       userEmail.id,
     );
-
     await this.emailService.sendEmail(
       email,
       'Email resending confirmation',

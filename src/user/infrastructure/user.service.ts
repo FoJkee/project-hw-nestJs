@@ -25,10 +25,9 @@ export class UserService {
     return this.userQueryRepository.getUsers(userQueryDto);
   }
 
-  async createUser(userDto: UserDto): Promise<UserViewModels | null> {
+  async createUser(userDto: UserDto): Promise<UserEntity> {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(userDto.password, salt);
-    const code = randomUUID();
 
     const newUser: UserEntity = {
       id: randomUUID(),
@@ -37,7 +36,7 @@ export class UserService {
       createdAt: new Date().toISOString(),
       passwordHash,
       emailConfirmation: {
-        codeConfirmation: code,
+        codeConfirmation: randomUUID(),
         expirationDate: new Date().toISOString(),
         isConfirmed: false,
       },
@@ -83,10 +82,11 @@ export class UserService {
     return this.userRepository.findUserByConfirmationCode(code);
   }
   async findUserAndUpdateByConfirmationCode(code: string) {
-    const user = await this.userRepository.findUserByConfirmationCode(code);
-    if (!user) throw new BadRequestException();
-    if (user.emailConfirmation.isConfirmed) throw new BadRequestException();
-    await this.userRepository.findUserAndUpdateByConfirmationCode(user.id);
+    return this.userRepository.findUserByConfirmationCode(code);
+    // if (!user) throw new BadRequestException();
+    // if (user.emailConfirmation.isConfirmed) throw new BadRequestException();
+    // await this.userRepository.findUserAndUpdateByConfirmationCode(user.id);
+    // return;
   }
 
   async updateUserPassword(userId: string, newPassword: string) {

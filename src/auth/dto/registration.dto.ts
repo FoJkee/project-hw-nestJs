@@ -1,4 +1,4 @@
-import { IsString, Length } from 'class-validator';
+import { IsEmail, IsString, Length } from 'class-validator';
 import {
   UserFindForEmail,
   UserFindForLogin,
@@ -12,7 +12,7 @@ export class RegistrationDto {
   @IsString()
   @Length(6, 20)
   password: string;
-  @IsString()
+  @IsEmail()
   @UserFindForEmail()
   email: string;
 }

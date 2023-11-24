@@ -39,6 +39,8 @@ import { BasicAuthGuard } from './guard/basic.auth.guard';
 import { EmailValidator, LoginValidator } from './user/dto/user.validator';
 import { JwtService } from '@nestjs/jwt';
 import { JwtServicess } from './auth/jwt/jwt';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { MailerConfigService } from './config/mailer.config';
 
 const repositories = [
   BlogRepository,
@@ -92,6 +94,7 @@ const schemas = [
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
+    MailerModule.forRootAsync({ useClass: MailerConfigService }),
     MongooseModule.forFeature(schemas),
   ],
   controllers: [...controllers],
