@@ -26,7 +26,7 @@ export class UserQueryRepository {
       ? userQueryDto.searchLoginTerm.toString()
       : '';
 
-    const filter = {
+    const filter: any = {
       $or: [
         { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
 

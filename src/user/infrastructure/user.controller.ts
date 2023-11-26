@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -15,13 +17,14 @@ import { PaginationView } from '../../pagination/pagination';
 import { UserViewModels } from '../models/user.view.models';
 import { UserDto } from '../dto/user.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
+import { UserEntity } from '../models/user.schema';
 
 @Controller('sa')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(BasicAuthGuard)
-  @Get('/users')
+  @Get('users')
   @HttpCode(200)
   async getUser(
     @Query() userQueryDto: UserQueryDto,
@@ -29,16 +32,20 @@ export class UserController {
     return this.userService.getUser(userQueryDto);
   }
 
-  @Post('/users')
+  @Post('users')
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
-  async createUser(@Body() userDto: UserDto): Promise<UserViewModels | null> {
+  async createUser(@Body() userDto: UserDto): Promise<UserEntity | null> {
     return this.userService.createUser(userDto);
   }
-  @Delete('/users/:userId')
   @UseGuards(BasicAuthGuard)
+  @Delete('/users/:userId')
   @HttpCode(204)
-  async deleteUserId(@Param('userId') userId: string) {
-    return this.userService.deleteUserId(userId);
+  async deleteUserId(@Param('userId') userId: string): Promise<boolean> {
+    try {
+      return this.userService.deleteUserId(userId);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
 }

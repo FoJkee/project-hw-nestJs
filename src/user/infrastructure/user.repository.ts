@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserEntity, UserDocument } from '../models/user.schema';
 import { Model } from 'mongoose';
 import { UserViewModels } from '../models/user.view.models';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserRepository {
@@ -20,7 +19,7 @@ export class UserRepository {
     return this.UserModel.findOne({ email }, { _id: 0 });
   }
 
-  async createUser(newUser: UserEntity): Promise<UserViewModels | null> {
+  async createUser(newUser: UserEntity): Promise<UserEntity | null> {
     await this.UserModel.create(newUser);
     return this._findUserId(newUser.id);
   }
@@ -36,8 +35,13 @@ export class UserRepository {
     return this.UserModel.findOne({ id: userId });
   }
 
-  async deleteUserId(userId: string) {
-    return this.UserModel.findOneAndDelete({ id: userId });
+  async deleteUserId(userId: string): Promise<boolean> {
+    try {
+      await this.UserModel.deleteOne({ id: userId });
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
   async findUserByLoginOrEmail(
     loginOrEmail: string,
@@ -49,34 +53,38 @@ export class UserRepository {
       { _id: 0, __v: 0 },
     );
   }
-  async updateUserByConfirmationCode(userId: string) {
+  async updateUserByConfirmationCode(
+    userId: string,
+    newCodeConfirmation: string,
+  ) {
     return this.UserModel.findOneAndUpdate(
       { id: userId },
       {
         $set: {
-          'emailConfirmation.codeConfirmation': randomUUID(),
+          'emailConfirmation.codeConfirmation': newCodeConfirmation,
           'emailConfirmation.isConfirmed': false,
         },
       },
+      { returnDocument: 'after' },
     );
   }
+
   async findUserByConfirmationCode(code: string) {
-    return this.UserModel.findOneAndUpdate(
-      { 'emailConfirmation.codeConfirmation': code },
-      { $set: { 'emailConfirmation.isConfirmed': true } },
-    );
+    return this.UserModel.findOne({
+      'emailConfirmation.codeConfirmation': code,
+    });
   }
   async updateUserPassword(userId: string, passwordHash: string) {
-    return this.UserModel.findOneAndUpdate(
-      { userId },
-      { $set: { passwordHash } },
+    return this.UserModel.updateOne(
+      { id: userId },
+      { $set: { passwordHash, 'emailConfirmation.isConfirmed': true } },
     );
   }
 
   async findUserAndUpdateByConfirmationCode(userId: string) {
-    return this.UserModel.findOneAndUpdate(
-      { userId },
-      { 'emailConfirmation.isConfirmed': true },
+    return this.UserModel.updateOne(
+      { id: userId },
+      { $set: { 'emailConfirmation.isConfirmed': true } },
     );
   }
 }
