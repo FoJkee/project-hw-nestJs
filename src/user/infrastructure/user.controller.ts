@@ -19,7 +19,7 @@ import { UserDto } from '../dto/user.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 import { UserEntity } from '../models/user.schema';
 
-@Controller('sa')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -35,8 +35,14 @@ export class UserController {
   @Post('users')
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
-  async createUser(@Body() userDto: UserDto): Promise<UserEntity | null> {
-    return this.userService.createUser(userDto);
+  async createUser(@Body() userDto: UserDto) {
+    const fullUser = (await this.userService.createUser(userDto)) as UserEntity;
+    return {
+      id: fullUser.id,
+      login: fullUser.login,
+      email: fullUser.email,
+      createdAt: fullUser.createdAt,
+    };
   }
   @UseGuards(BasicAuthGuard)
   @Delete('/users/:userId')

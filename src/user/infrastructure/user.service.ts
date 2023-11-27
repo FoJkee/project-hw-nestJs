@@ -43,7 +43,7 @@ export class UserService {
     };
     const result = await this.userRepository.createUser({ ...newUser });
     if (!result) throw new BadRequestException();
-    return result;
+    return newUser;
   }
 
   async deleteUserId(userId: string) {
@@ -89,8 +89,20 @@ export class UserService {
   }
   async findUserAndUpdateByConfirmationCode(code: string) {
     const user = await this.userRepository.findUserByConfirmationCode(code);
-    if (!user) throw new BadRequestException();
-    if (user.emailConfirmation.isConfirmed) throw new BadRequestException();
+    if (!user)
+      throw new BadRequestException([
+        // {
+        //   message: 'invalid code',
+        //   field: 'code',
+        // },
+      ]);
+    if (user.emailConfirmation.isConfirmed)
+      throw new BadRequestException([
+        {
+          message: 'invalid code',
+          field: 'code',
+        },
+      ]);
     await this.userRepository.findUserAndUpdateByConfirmationCode(user.id);
     return;
   }

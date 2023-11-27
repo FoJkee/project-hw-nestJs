@@ -29,7 +29,8 @@ export class AuthService {
       loginDto.loginOrEmail,
       loginDto.password,
     );
-    if (!user) return null;
+    if (!user) throw new UnauthorizedException();
+
     const deviceId = randomUUID();
 
     const { accessToken, refreshToken } =
@@ -82,15 +83,17 @@ export class AuthService {
 
   async registration(registrationDto: RegistrationDto) {
     const newUser = await this.userService.createUser(registrationDto);
+
     if (!newUser) throw new BadRequestException();
     await this.emailService.sendEmail(
       newUser.email,
       'Registration',
       `<h1>Registation</h1>
             <p>To finish registration please follow the link below:
-             <a href="https://somesite.com/confirm-email?code=${newUser.emailConfirmation.codeConfirmation}">complete registration</a>
+             <a href="https://somesite.com/confirm-email?code=${newUser.emailConfirmation?.codeConfirmation}">complete registration</a>
             </p>`,
     );
+
     return;
   }
   async registrationConfirmation(code: string) {
@@ -100,6 +103,7 @@ export class AuthService {
   async passwordRecovery(email: string) {
     const userEmail = await this.userRepository.findUserByEmail(email);
     if (!userEmail) throw new BadRequestException();
+
     const newCodeConfirmation = randomUUID();
 
     const updateUser = await this.userService.updateUserByConfirmationCode(
@@ -109,7 +113,7 @@ export class AuthService {
     if (!updateUser) throw new BadRequestException();
 
     await this.emailService.sendEmail(
-      email,
+      userEmail.email,
       'Email resending conformation',
       `<h1>Password recovery confirmation</h1>
             <p>To finish password recovery please follow the link below:
@@ -133,9 +137,20 @@ export class AuthService {
 
   async registrationEmailResending(email: string) {
     const userEmail = await this.userRepository.findUserByEmail(email);
-    if (!userEmail) throw new BadRequestException();
+    if (!userEmail)
+      throw new BadRequestException([
+        {
+          message: `email don't exist`,
+          field: 'email',
+        },
+      ]);
     if (userEmail.emailConfirmation.isConfirmed)
-      throw new BadRequestException();
+      throw new BadRequestException([
+        {
+          message: 'email already confirmed',
+          field: 'email',
+        },
+      ]);
 
     const newCodeConfirmation = randomUUID();
 
@@ -143,15 +158,21 @@ export class AuthService {
       userEmail.id,
       newCodeConfirmation,
     );
-    if (!updateUser) throw new BadRequestException();
+
+    // if (updateUser!.emailConfirmation.isConfirmed === true)
+    //   throw new BadRequestException();
+
     await this.emailService.sendEmail(
       email,
       'Email resending confirmation',
       `<h1>Email resending confirmation</h1>
             <p>To finish email resending please follow the link below:
-             <a href='https://somesite.com/confirm-email?code=${updateUser.emailConfirmation.codeConfirmation}'>complete registration</a>
+             <a href='https://somesite.com/confirm-email?code=${
+               updateUser!.emailConfirmation.codeConfirmation
+             }'>complete registration</a>
             </p>`,
     );
+
     return;
   }
 }
