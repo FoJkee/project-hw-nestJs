@@ -51,6 +51,7 @@ export class AuthController {
         httpOnly: true,
         secure: true,
       });
+
       return { accessToken: accessToken };
     } catch (e) {
       throw new UnauthorizedException();
