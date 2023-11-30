@@ -1,5 +1,6 @@
-import { IsString, MaxLength } from 'class-validator';
-import { BlogDecoratorExist } from '../../blog/dto/blog.decorator';
+import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { BlogDecoratorExist } from '../../decorators/blog.decorator';
+import { Type } from 'class-transformer';
 
 export class CreatePostDto {
   @IsString()
@@ -12,6 +13,9 @@ export class CreatePostDto {
   @MaxLength(1000)
   content: string;
   @IsString()
-  @BlogDecoratorExist()
+  @IsUUID()
+  @IsOptional()
+  @Type(() => String)
+  // @BlogDecoratorExist()
   blogId: string;
 }

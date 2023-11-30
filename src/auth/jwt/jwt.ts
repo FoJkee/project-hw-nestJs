@@ -9,8 +9,9 @@ export class JwtServicess {
     private readonly jwtService: JwtService,
   ) {}
 
-  private accessJwtSecret = this.configService.get('jwt_access_secret');
-  private refreshJwtToken = this.configService.get('jwt_refresh_secret');
+  private accessJwtSecret = this.configService.get<string>('jwt_access_secret');
+  private refreshJwtToken =
+    this.configService.get<string>('jwt_refresh_secret');
 
   async createAccessAndRefreshToken(deviceId: string, userId: string) {
     const accessToken = this.jwtService.sign(

@@ -38,13 +38,13 @@ export class PostController {
     return this.postService.getPosts(queryDto);
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(201)
   async createPost(
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels | null> {
     const blog = await this.blogService.findBlogId(createPostDto.blogId);
-    if (!blog) throw new NotFoundException();
     return this.postService.createPost(
       createPostDto,
       createPostDto.blogId,

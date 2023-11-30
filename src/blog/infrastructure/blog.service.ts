@@ -37,7 +37,7 @@ export class BlogService {
       createdAt: new Date().toISOString(),
       isMembership: false,
     };
-    const result = await this.blogRepository.createBlog(newBlog);
+    const result = await this.blogRepository.createBlog({ ...newBlog });
     if (!result) throw new BadRequestException();
     return newBlog;
   }
@@ -55,7 +55,7 @@ export class BlogService {
   }
 
   async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {
-    const blog = await this.findBlogId(blogId);
+    const blog = await this.blogRepository.findBlogId(blogId);
     if (!blog) throw new NotFoundException();
     return this.blogRepository.updateBlogId(createBlogDto, blogId);
   }

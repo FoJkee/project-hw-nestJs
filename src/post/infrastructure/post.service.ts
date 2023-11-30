@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post } from '../models/post.schema';
 import { CreatePostDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
@@ -51,7 +55,8 @@ export class PostService {
         newestLikes: [],
       },
     };
-    await this.postRepository.createPost(newPost);
+    const result = await this.postRepository.createPost({ ...newPost });
+    if (!result) throw new BadRequestException();
     return newPost;
   }
 
