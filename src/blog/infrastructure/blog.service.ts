@@ -48,10 +48,8 @@ export class BlogService {
     return this.blogRepository.deleteBlogId(blogId);
   }
 
-  async findBlogId(blogId: string) {
-    const blog = await this.blogRepository.findBlogId(blogId);
-    if (!blog) throw new NotFoundException();
-    return blog;
+  async findBlogId(blogId: string): Promise<BlogViewModels | null> {
+    return this.blogRepository.findBlogId(blogId);
   }
 
   async updateBlogId(createBlogDto: CreateBlogDto, blogId): Promise<boolean> {

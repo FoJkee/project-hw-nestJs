@@ -1,32 +1,61 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { extendedLikesInfo, Post, PostDocument } from '../models/post.schema';
-import { Model } from 'mongoose';
+import { Post, PostDocument } from '../models/post.schema';
+import { Model, Promise } from 'mongoose';
 import { pagination, PaginationView } from '../../pagination/pagination';
 import { PostViewModels } from '../models/post.view.models';
 import { Comment, CommentDocument } from '../../comment/models/comment.schema';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
+import { PostRepository } from './post.repository';
+import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
 
 export class PostQueryRepository {
   constructor(
     @InjectModel(Post.name) private readonly PostModel: Model<PostDocument>,
     @InjectModel(Comment.name)
     private readonly CommentModel: Model<CommentDocument>,
+    private readonly postRepository: PostRepository,
+    private readonly reactionRepository: ReactionRepository,
   ) {}
 
   async getPosts(
     queryDto: QueryDto,
+    userId: string,
   ): Promise<PaginationView<PostViewModels[]>> {
     const { sortBy, pageSize, pageNumber, sortDirection } =
       pagination(queryDto);
 
-    const post = await this.PostModel.find(
-      {},
-      { _id: 0, __v: 0, extendedLikesInfo: { _id: 0 } },
-    )
+    const post = await this.PostModel.find({}, { _id: 0, __v: 0 })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
       .skip(pageSize * (pageNumber - 1))
       .limit(pageSize);
+
+    // const result = post.map(async (post) => {
+    //   if (userId) {
+    //     const userLike = await this.postRepository.getUserLikePost(
+    //       post.id,
+    //       userId,
+    //     );
+    //     if (userLike) {
+    //       post.extendedLikesInfo.myStatus = userLike.status;
+    //     }
+    //
+    //     const newestLike = await this.reactionRepository.newestLike(post.id, 3);
+    //     const newestLikeMap = newestLike.map((el) => ({
+    //       addedAt: el.createAt,
+    //       userId: el.userId,
+    //       login: el.userLogin,
+    //     }));
+    //     return {
+    //       ...post,
+    //       extendedLikesInfo: {
+    //         ...post.extendedLikesInfo,
+    //         newestLikes: newestLikeMap,
+    //       },
+    //     };
+    //   }
+    //   return Promise.all(result);
+    // });
 
     const getPosts = post.map((el) => ({
       id: el.id,
@@ -40,7 +69,11 @@ export class PostQueryRepository {
         likesCount: el.extendedLikesInfo.likesCount,
         dislikesCount: el.extendedLikesInfo.dislikesCount,
         myStatus: el.extendedLikesInfo.myStatus,
-        newestLikes: el.extendedLikesInfo.newestLikes,
+        newestLikes: el.extendedLikesInfo.newestLikes.map((post) => ({
+          addedAt: post.addedAt,
+          userId: post.userId,
+          login: post.login,
+        })),
       },
     }));
 

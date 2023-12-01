@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { CreatePostDto } from '../dto/post.dto';
@@ -25,6 +26,7 @@ import { Reaction } from '../../reaction/dto/reaction.dto';
 import { UserId } from '../../decorators/userId.decorator';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
+import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
 
 @Controller('posts')
 export class PostController {
@@ -34,8 +36,9 @@ export class PostController {
   ) {}
 
   @Get()
-  async getPosts(@Query() queryDto: QueryDto) {
-    return this.postService.getPosts(queryDto);
+  @UseGuards(BearerUserIdGuard)
+  async getPosts(@Query() queryDto: QueryDto, @UserId() userId) {
+    return this.postService.getPosts(queryDto, userId);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -45,6 +48,7 @@ export class PostController {
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels | null> {
     const blog = await this.blogService.findBlogId(createPostDto.blogId);
+    if (!blog) return null;
     return this.postService.createPost(
       createPostDto,
       createPostDto.blogId,
@@ -111,16 +115,18 @@ export class PostController {
   }
   @UseGuards(BearerAuthGuard)
   @Put(':postId/like-status')
+  @HttpCode(204)
   async updatePostIdLikeStatus(
     @Param('postId') postId: string,
     @User() user: UserEntity,
     @Body() likeStatusDto: Reaction,
   ) {
-    return this.postService.updatePostIdLikeStatus(
+    const result = await this.postService.updatePostIdLikeStatus(
       postId,
       user.id,
       user.login,
       likeStatusDto.likeStatus,
     );
+    if (!result) throw new NotFoundException();
   }
 }

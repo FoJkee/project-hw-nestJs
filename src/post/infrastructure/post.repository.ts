@@ -89,10 +89,18 @@ export class PostRepository {
         status: myStatusView.DisLike,
       }),
     ]);
+
     post.extendedLikesInfo.likesCount = likesCount;
     post.extendedLikesInfo.dislikesCount = dislikesCount;
 
-    await this.PostModel.updateOne({ id: post.id }, { ...post });
+    await this.PostModel.updateOne(
+      { id: post.id },
+      {
+        $set: {
+          extendedLikesInfo: { ...post.extendedLikesInfo, myStatus: status },
+        },
+      },
+    );
     return true;
   }
 }

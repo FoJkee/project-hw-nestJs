@@ -26,7 +26,7 @@ type extendedLikesInfoView = {
 export enum myStatusView {
   None = 'None',
   Like = 'Like',
-  DisLike = 'DisLike',
+  DisLike = 'Dislike',
 }
 
 type newestLikesView = {

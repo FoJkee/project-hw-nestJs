@@ -1,12 +1,5 @@
-import {
-  registerDecorator,
-  ValidationOptions,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-} from 'class-validator';
-
-import { Injectable } from '@nestjs/common';
-import { BlogService } from '../blog/infrastructure/blog.service';
+import { registerDecorator, ValidationOptions } from 'class-validator';
+import { BlogValidator } from '../validators/blog.validator';
 
 export function BlogDecoratorExist(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
@@ -18,23 +11,4 @@ export function BlogDecoratorExist(validationOptions?: ValidationOptions) {
       validator: BlogValidator,
     });
   };
-}
-
-@ValidatorConstraint({ name: 'BlogValidatorExist', async: true })
-@Injectable()
-export class BlogValidator implements ValidatorConstraintInterface {
-  constructor(private readonly blogService: BlogService) {}
-
-  async validate(blogId: string): Promise<boolean> {
-    try {
-      const res = await this.blogService.findBlogId(blogId);
-      if (res) return true;
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  defaultMessage() {
-    return `Blog doesn't exist`;
-  }
 }

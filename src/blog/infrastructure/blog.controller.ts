@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
@@ -21,6 +22,7 @@ import { PostViewModels } from '../../post/models/post.view.models';
 import { PaginationView } from '../../pagination/pagination';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
+import { Blog } from '../models/blog.schema';
 
 @Controller('blogs')
 export class BlogController {
@@ -66,6 +68,7 @@ export class BlogController {
   ): Promise<PostViewModels | null> {
     try {
       const blog = await this.blogService.findBlogId(blogId);
+      if (!blog) return null;
       return await this.postService.createPost(
         createPostDto,
         blogId,
@@ -77,12 +80,10 @@ export class BlogController {
   }
 
   @Get(':blogId')
-  async findBlogId(@Param('blogId') blogId: string) {
-    try {
-      return await this.blogService.findBlogId(blogId);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+  async findBlogId(@Param('blogId') blogId: string): Promise<Blog> {
+    const blog = await this.blogService.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return blog;
   }
 
   @UseGuards(BasicAuthGuard)

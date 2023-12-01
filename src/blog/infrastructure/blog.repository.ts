@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../models/blog.schema';
 import { Model } from 'mongoose';
 import { CreateBlogDto } from '../dto/blog.dto';
+import { BlogViewModels } from '../models/blog.view.models';
 
 @Injectable()
 export class BlogRepository {
@@ -28,7 +29,7 @@ export class BlogRepository {
     }
   }
 
-  async findBlogId(blogId: string) {
+  async findBlogId(blogId: string): Promise<BlogViewModels | null> {
     return this.BlogModel.findOne({ id: blogId }, { __v: 0, _id: 0 });
   }
 

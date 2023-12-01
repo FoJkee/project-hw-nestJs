@@ -17,6 +17,7 @@ export class BearerAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const auth = request.headers.authorization;
+    if (!auth) throw new UnauthorizedException();
     const token = auth.split(' ')[1];
     if (!token) throw new UnauthorizedException();
 

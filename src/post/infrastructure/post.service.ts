@@ -31,8 +31,9 @@ export class PostService {
 
   async getPosts(
     queryDto: QueryDto,
+    userId: string,
   ): Promise<PaginationView<PostViewModels[]>> {
-    return this.postQueryRepository.getPosts(queryDto);
+    return this.postQueryRepository.getPosts(queryDto, userId);
   }
 
   async createPost(
