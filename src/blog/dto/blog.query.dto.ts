@@ -4,10 +4,10 @@ import { Type } from 'class-transformer';
 export class BlogQueryDto {
   @IsString()
   @IsOptional()
-  searchNameTerm: string;
+  searchNameTerm: string | null = null;
   @IsString()
   @IsOptional()
-  sortBy: string = 'createAt';
+  sortBy: string = 'createdAt';
   @IsString()
   @IsOptional()
   sortDirection: string = 'desc';

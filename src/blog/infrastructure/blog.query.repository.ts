@@ -20,11 +20,12 @@ export class BlogQueryRepository {
     const searchNameTerm = blogQueryDto.searchNameTerm
       ? blogQueryDto.searchNameTerm.toString()
       : '';
-
     const { sortBy, pageSize, pageNumber, sortDirection } =
       pagination(blogQueryDto);
 
-    const filter = { name: { $regex: searchNameTerm, $options: 'i' } };
+    const filter = {
+      name: { $regex: searchNameTerm, $options: 'i' },
+    };
 
     const blog = await this.BlogModel.find(filter, { _id: 0, __v: 0 })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })

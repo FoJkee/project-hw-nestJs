@@ -1,20 +1,28 @@
-import { IsString, IsUUID, MaxLength, Validate } from 'class-validator';
-import { BlogDecoratorExist } from '../../decorators/blog.decorator';
-import { BlogValidator } from '../../validators/blog.validator';
+import { IsString, IsUUID, Length } from 'class-validator';
 
-export class CreatePostDto {
+export class CreatePostForBlogDto {
   @IsString()
-  @MaxLength(30)
+  @Length(1, 30)
   title: string;
   @IsString()
-  @MaxLength(100)
+  @Length(1, 100)
   shortDescription: string;
   @IsString()
-  @MaxLength(1000)
+  @Length(1, 1000)
   content: string;
   @IsString()
   @IsUUID()
   // @BlogDecoratorExist()
-  @Validate(BlogValidator)
   blogId: string;
+}
+export class CreatePostDto {
+  @IsString()
+  @Length(1, 30)
+  title: string;
+  @IsString()
+  @Length(1, 100)
+  shortDescription: string;
+  @IsString()
+  @Length(1, 1000)
+  content: string;
 }

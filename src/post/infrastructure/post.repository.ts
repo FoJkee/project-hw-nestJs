@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../models/post.schema';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blog/models/blog.schema';
-import { CreatePostDto } from '../dto/post.dto';
+import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { myStatusView, PostViewModels } from '../models/post.view.models';
 import {
   Reaction,
   ReactionDocument,
 } from '../../reaction/models/reaction.schema';
+import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
 
 @Injectable()
 export class PostRepository {
@@ -17,6 +18,7 @@ export class PostRepository {
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,
     @InjectModel(Reaction.name)
     private readonly ReactionModel: Model<ReactionDocument>,
+    private readonly reactionRepository: ReactionRepository,
   ) {}
 
   async createPost(newPost: Post): Promise<PostViewModels | boolean> {
@@ -30,12 +32,12 @@ export class PostRepository {
 
   async updatePostId(
     postId: string,
-    createPostDto: CreatePostDto,
+    createPostForBlogDto: CreatePostForBlogDto,
   ): Promise<boolean> {
     try {
       await this.PostModel.findOneAndUpdate(
         { id: postId },
-        { $set: createPostDto },
+        { $set: createPostForBlogDto },
       );
       return true;
     } catch (e) {
@@ -43,26 +45,52 @@ export class PostRepository {
     }
   }
 
-  async getPostId(postId: string): Promise<PostViewModels | null> {
-    return this.PostModel.findOne(
+  async getPostId(
+    postId: string,
+    userId: string | null,
+  ): Promise<PostViewModels | null> {
+    const post = await this.PostModel.findOne(
       { id: postId },
-      { __v: 0, _id: 0, extendedLikesInfo: { _id: 0 } },
+      { __v: 0, _id: 0, 'extendedLikesInfo._id': 0 },
     ).lean();
 
-    // if (!result) return null;
+    if (!post) return null;
 
-    // const newestLike = await this;
+    if (userId) {
+      const userLikePost = await this.getUserLikePost(postId, userId);
+      if (userLikePost) {
+        post.extendedLikesInfo.myStatus = userLikePost.status;
+      }
+    }
+
+    const newestLike = await this.reactionRepository.newestLike(postId);
+
+    const newestLikeMap = newestLike.map((el) => ({
+      addedAt: el.createAt,
+      userId: el.userId,
+      login: el.userLogin,
+    }));
+
+    return {
+      ...post,
+      extendedLikesInfo: {
+        ...post.extendedLikesInfo,
+        newestLikes: newestLikeMap,
+      },
+    };
   }
 
-  async deletePostId(postId: string): Promise<boolean> {
+  async deletePostId(postId: string) {
     try {
-      await this.PostModel.findOneAndDelete({ id: postId });
-      return true;
+      return this.PostModel.findOneAndDelete({ id: postId });
     } catch (e) {
       return false;
     }
   }
-  async getUserLikePost(postId: string, userId: string) {
+  async getUserLikePost(
+    postId: string,
+    userId: string | null,
+  ): Promise<Reaction | null> {
     return this.ReactionModel.findOne({ id: postId, userId });
   }
 
@@ -72,7 +100,7 @@ export class PostRepository {
     userLogin: string,
     status: myStatusView,
   ): Promise<boolean> {
-    const post = await this.getPostId(postId);
+    const post = await this.getPostId(postId, userId);
     if (!post) return false;
 
     await this.ReactionModel.updateOne(

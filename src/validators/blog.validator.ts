@@ -11,9 +11,13 @@ export class BlogValidator implements ValidatorConstraintInterface {
   constructor(private readonly blogRepository: BlogRepository) {}
 
   async validate(blogId: string): Promise<boolean> {
-    const blog = await this.blogRepository.findBlogId(blogId);
-    if (!blog) return false;
-    return true;
+    try {
+      const blog = await this.blogRepository.findBlogId(blogId);
+      if (!blog) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   defaultMessage() {

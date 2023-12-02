@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Post } from '../models/post.schema';
-import { CreatePostDto } from '../dto/post.dto';
+import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
@@ -63,22 +59,19 @@ export class PostService {
 
   async updatePostId(
     postId: string,
-    createPostDto: CreatePostDto,
-  ): Promise<boolean> {
-    const post = await this.postRepository.getPostId(postId);
-    if (!post) throw new NotFoundException();
-    return this.postRepository.updatePostId(postId, createPostDto);
+    createPostForBlogDto: CreatePostForBlogDto,
+  ) {
+    return this.postRepository.updatePostId(postId, createPostForBlogDto);
   }
 
-  async getPostId(postId: string): Promise<PostViewModels | null> {
-    const post = await this.postRepository.getPostId(postId);
-    if (!post) throw new NotFoundException();
-    return post;
+  async getPostId(
+    postId: string,
+    userId: string | null,
+  ): Promise<PostViewModels | null> {
+    return await this.postRepository.getPostId(postId, userId);
   }
 
-  async deletePostId(postId: string): Promise<boolean> {
-    const post = await this.postRepository.getPostId(postId);
-    if (!post) throw new NotFoundException();
+  async deletePostId(postId: string) {
     return this.postRepository.deletePostId(postId);
   }
 

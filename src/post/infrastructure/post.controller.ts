@@ -9,10 +9,9 @@ import {
   Post,
   Put,
   Query,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostDto } from '../dto/post.dto';
+import { CreatePostForBlogDto } from '../dto/post.dto';
 import { PostService } from './post.service';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
@@ -27,12 +26,14 @@ import { UserId } from '../../decorators/userId.decorator';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
+import { PostRepository } from './post.repository';
 
 @Controller('posts')
 export class PostController {
   constructor(
-    private postService: PostService,
-    private blogService: BlogService,
+    private readonly postService: PostService,
+    private readonly blogService: BlogService,
+    private readonly postRepository: PostRepository,
   ) {}
 
   @Get()
@@ -45,26 +46,27 @@ export class PostController {
   @Post()
   @HttpCode(201)
   async createPost(
-    @Body() createPostDto: CreatePostDto,
+    @Body() createPostForBlogDto: CreatePostForBlogDto,
   ): Promise<PostViewModels | null> {
-    const blog = await this.blogService.findBlogId(createPostDto.blogId);
+    const blog = await this.blogService.findBlogId(createPostForBlogDto.blogId);
     if (!blog) return null;
-    return this.postService.createPost(
-      createPostDto,
-      createPostDto.blogId,
+    return await this.postService.createPost(
+      createPostForBlogDto,
+      createPostForBlogDto.blogId,
       blog.name,
     );
   }
 
   @Get(':postId')
+  @UseGuards(BearerUserIdGuard)
+  @HttpCode(200)
   async getPostId(
     @Param('postId') postId: string,
+    @UserId() userId: string | null,
   ): Promise<PostViewModels | null> {
-    try {
-      return await this.postService.getPostId(postId);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+    const post = await this.postService.getPostId(postId, userId);
+    if (!post) throw new NotFoundException();
+    return post;
   }
 
   @UseGuards(BasicAuthGuard)
@@ -72,24 +74,23 @@ export class PostController {
   @HttpCode(204)
   async updatePost(
     @Param('postId') postId: string,
-    @Body() createPostDto: CreatePostDto,
+    @Body() createPostForBlogDto: CreatePostForBlogDto,
   ) {
-    try {
-      return await this.postService.updatePostId(postId, createPostDto);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+    const updatePost = await this.postService.updatePostId(
+      postId,
+      createPostForBlogDto,
+    );
+    if (!updatePost) throw new NotFoundException();
+    return;
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(':postId')
   @HttpCode(204)
-  async deletePostId(@Param('postId') postId: string): Promise<boolean> {
-    try {
-      return await this.postService.deletePostId(postId);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+  async deletePostId(@Param('postId') postId: string) {
+    const deletePost = await this.postService.deletePostId(postId);
+    if (!deletePost) throw new NotFoundException();
+    return;
   }
 
   @Get(':postId/comments')
@@ -128,5 +129,6 @@ export class PostController {
       likeStatusDto.likeStatus,
     );
     if (!result) throw new NotFoundException();
+    return;
   }
 }

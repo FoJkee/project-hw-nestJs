@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Query,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
