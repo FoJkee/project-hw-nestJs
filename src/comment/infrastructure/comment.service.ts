@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -10,8 +11,21 @@ import { myStatusView } from '../../post/models/post.view.models';
 export class CommentService {
   constructor(private readonly commentRepository: CommentRepository) {}
 
-  async getCommentsId(commentId: string) {
-    return this.commentRepository.getCommentsId(commentId);
+  async getCommentsId(commentId: string, userId: string | null) {
+    const comment = await this.commentRepository.getCommentsId(commentId);
+
+    if (!comment) throw new NotFoundException();
+
+    if (userId) {
+      const userLike = await this.commentRepository.getUserLikeComment(
+        commentId,
+        userId,
+      );
+      if (userLike) {
+        comment.likesInfo.myStatus = userLike.status;
+      }
+    }
+    return comment;
   }
 
   async deleteCommentId(commentId: string, userId: string) {
@@ -36,6 +50,8 @@ export class CommentService {
     commentId: string,
     status: myStatusView,
   ) {
+    const comment = await this.commentRepository.getCommentsId(commentId);
+    if (!comment) throw new NotFoundException();
     return this.commentRepository.updateCommentIdLikeStatus(
       userId,
       userLogin,

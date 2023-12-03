@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post } from '../models/post.schema';
 import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
@@ -78,8 +82,11 @@ export class PostService {
   async getCommentForPost(
     queryDto: QueryDto,
     postId: string,
+    userId: string | null,
   ): Promise<PaginationView<CommentViewModels[]>> {
-    return this.postQueryRepository.getCommentForPost(queryDto, postId);
+    const post = await this.postRepository.getPostId(postId, userId);
+    if (!post) throw new NotFoundException();
+    return this.postQueryRepository.getCommentForPost(queryDto, postId, userId);
   }
   async createCommentForPost(
     postId: string,

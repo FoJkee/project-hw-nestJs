@@ -38,6 +38,7 @@ export class PostController {
 
   @Get()
   @UseGuards(BearerUserIdGuard)
+  @HttpCode(200)
   async getPosts(@Query() queryDto: QueryDto, @UserId() userId) {
     return this.postService.getPosts(queryDto, userId);
   }
@@ -94,23 +95,29 @@ export class PostController {
   }
 
   @Get(':postId/comments')
+  @UseGuards(BearerUserIdGuard)
+  @HttpCode(200)
   async getCommentForPost(
     @Param('postId') postId: string,
     @Query() queryDto: QueryDto,
+    @UserId() userId: string | null,
   ): Promise<PaginationView<CommentViewModels[]>> {
-    return this.postService.getCommentForPost(queryDto, postId);
+    return this.postService.getCommentForPost(queryDto, postId, userId);
   }
 
   @UseGuards(BearerAuthGuard)
   @Post(':postId/comments')
+  @HttpCode(201)
   async createCommentForPost(
     @Param('postId') postId: string,
     @Body() createCommentDto: CommentDto,
-    @UserId() userId,
+    @User() user: UserEntity,
   ): Promise<CommentViewModels> {
+    const post = await this.postService.getPostId(postId, user.id);
+    if (!post) throw new NotFoundException();
     return this.postService.createCommentForPost(
       postId,
-      userId,
+      user,
       createCommentDto,
     );
   }

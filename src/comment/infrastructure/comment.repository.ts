@@ -75,9 +75,9 @@ export class CommentRepository {
     comment.likesInfo.likesCount = likesCount;
     comment.likesInfo.dislikesCount = dislikesCount;
 
-    await this.ReactionModel.updateOne(
+    await this.CommentModel.updateOne(
       { id: comment.id },
-      { $set: { ...comment } },
+      { $set: { ...comment, likesInfo: status } },
     );
     return true;
   }
@@ -92,7 +92,10 @@ export class CommentRepository {
     }
   }
 
-  async getUserLikeComment(commentId: string, userId: string) {
+  async getUserLikeComment(
+    commentId: string,
+    userId: string,
+  ): Promise<Reaction | null> {
     return this.ReactionModel.findOne({ id: commentId, userId });
   }
 }

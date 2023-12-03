@@ -8,6 +8,7 @@ import { QueryDto } from '../../pagination/pagination.query.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostRepository } from './post.repository';
 import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
+import { CommentRepository } from '../../comment/infrastructure/comment.repository';
 
 export class PostQueryRepository {
   constructor(
@@ -16,6 +17,7 @@ export class PostQueryRepository {
     private readonly CommentModel: Model<CommentDocument>,
     private readonly postRepository: PostRepository,
     private readonly reactionRepository: ReactionRepository,
+    private readonly commentRepository: CommentRepository,
   ) {}
 
   async getPosts(
@@ -32,7 +34,7 @@ export class PostQueryRepository {
 
     // const result = post.map(async (post) => {
     //   if (userId) {
-    //     const userLike = await this.postRepository.getUserLikePost(
+    // const userLike = await this.postRepository.getUserLikePost(
     //       post.id,
     //       userId,
     //     );
@@ -91,6 +93,7 @@ export class PostQueryRepository {
   async getCommentForPost(
     queryDto: QueryDto,
     postId: string,
+    userId: string | null,
   ): Promise<PaginationView<CommentViewModels[]>> {
     const { sortBy, sortDirection, pageSize, pageNumber } =
       pagination(queryDto);
@@ -101,10 +104,22 @@ export class PostQueryRepository {
       _id: 0,
       __v: 0,
       postId: 0,
+      'commentatorInfo._id': 0,
+      'likesInfo._id': 0,
     })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
       .skip(pageSize * (pageNumber - 1))
       .limit(pageSize);
+
+    await comment.map(async (comment) => {
+      if (userId) {
+        const findUserLikeStatus =
+          await this.commentRepository.getUserLikeComment(comment.id, userId);
+        if (findUserLikeStatus) {
+          comment.likesInfo.myStatus = findUserLikeStatus.status;
+        }
+      }
+    });
 
     const countDocument = await this.CommentModel.countDocuments(filter);
 
