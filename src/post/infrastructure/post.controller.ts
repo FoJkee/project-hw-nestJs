@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,7 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostForBlogDto } from '../dto/post.dto';
+import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { PostService } from './post.service';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
@@ -50,7 +51,13 @@ export class PostController {
     @Body() createPostForBlogDto: CreatePostForBlogDto,
   ): Promise<PostViewModels | null> {
     const blog = await this.blogService.findBlogId(createPostForBlogDto.blogId);
-    if (!blog) return null;
+    if (!blog)
+      throw new BadRequestException([
+        {
+          message: 'Blog is not exist',
+          field: 'blogId',
+        },
+      ]);
     return await this.postService.createPost(
       createPostForBlogDto,
       createPostForBlogDto.blogId,
@@ -64,7 +71,7 @@ export class PostController {
   async getPostId(
     @Param('postId') postId: string,
     @UserId() userId: string | null,
-  ): Promise<PostViewModels | null> {
+  ) {
     const post = await this.postService.getPostId(postId, userId);
     if (!post) throw new NotFoundException();
     return post;
@@ -75,11 +82,11 @@ export class PostController {
   @HttpCode(204)
   async updatePost(
     @Param('postId') postId: string,
-    @Body() createPostForBlogDto: CreatePostForBlogDto,
+    @Body() createPostDto: CreatePostDto,
   ) {
     const updatePost = await this.postService.updatePostId(
       postId,
-      createPostForBlogDto,
+      createPostDto,
     );
     if (!updatePost) throw new NotFoundException();
     return;
@@ -112,7 +119,7 @@ export class PostController {
     @Param('postId') postId: string,
     @Body() createCommentDto: CommentDto,
     @User() user: UserEntity,
-  ): Promise<CommentViewModels> {
+  ) {
     const post = await this.postService.getPostId(postId, user.id);
     if (!post) throw new NotFoundException();
     return this.postService.createCommentForPost(

@@ -11,12 +11,14 @@ export class ReactionRepository {
     private readonly ReactionModel: Model<ReactionDocument>,
   ) {}
 
-  async newestLike(postId: string): Promise<Reaction[]> {
+  async newestLike(postId: string, num: number): Promise<Reaction[]> {
     return this.ReactionModel.find({
       postId,
       status: myStatusView.Like,
-    }).sort({
-      createdAt: -1,
-    });
+    })
+      .sort({
+        createdAt: -1,
+      })
+      .limit(num);
   }
 }

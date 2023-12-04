@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Post } from '../models/post.schema';
-import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
+import { CreatePostDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
@@ -59,13 +59,17 @@ export class PostService {
     const result = await this.postRepository.createPost({ ...newPost });
     if (!result) throw new BadRequestException();
     return newPost;
+    // extendedLikesInfo: {
+    //   myStatus: myStatusView.None,
+    //   newestLikes: [],
+    //   ...newPost.extendedLikesInfo,
+    // },
   }
 
-  async updatePostId(
-    postId: string,
-    createPostForBlogDto: CreatePostForBlogDto,
-  ) {
-    return this.postRepository.updatePostId(postId, createPostForBlogDto);
+  async updatePostId(postId: string, createPostDto: CreatePostDto) {
+    const post = await this.postRepository.getPostId(postId, null);
+    if (!post) throw new NotFoundException();
+    return this.postRepository.updatePostId(postId, createPostDto);
   }
 
   async getPostId(
@@ -92,7 +96,7 @@ export class PostService {
     postId: string,
     user: UserEntity,
     createCommentDto: CommentDto,
-  ) {
+  ): Promise<CommentViewModels | null> {
     const newComment: Comment = {
       id: randomUUID(),
       postId,
@@ -109,8 +113,11 @@ export class PostService {
       },
     };
 
-    await this.commentRepository.createCommentForPost(newComment);
-    return newComment;
+    const result = await this.commentRepository.createCommentForPost({
+      ...newComment,
+    });
+    if (!result) throw new BadRequestException();
+    return result;
   }
 
   async updatePostIdLikeStatus(

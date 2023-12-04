@@ -21,7 +21,13 @@ export class CommentRepository {
   async getCommentsId(commentId: string) {
     return this.CommentModel.findOne(
       { id: commentId },
-      { __v: 0, _id: 0, postId: 0 },
+      {
+        __v: 0,
+        _id: 0,
+        postId: 0,
+        'commentatorInfo._id': 0,
+        'likesInfo._id': 0,
+      },
     );
   }
   async deleteCommentId(commentId: string) {
@@ -83,19 +89,15 @@ export class CommentRepository {
   }
   async createCommentForPost(
     newComment: Comment,
-  ): Promise<CommentViewModels | boolean> {
-    try {
-      await this.CommentModel.create(newComment);
-      return true;
-    } catch (e) {
-      return false;
-    }
+  ): Promise<CommentViewModels | null> {
+    await this.CommentModel.create(newComment);
+    return this.getCommentsId(newComment.id);
   }
 
   async getUserLikeComment(
     commentId: string,
     userId: string,
   ): Promise<Reaction | null> {
-    return this.ReactionModel.findOne({ id: commentId, userId });
+    return this.ReactionModel.findOne({ commentId, userId });
   }
 }

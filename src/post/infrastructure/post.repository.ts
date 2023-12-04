@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../models/post.schema';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blog/models/blog.schema';
-import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { myStatusView, PostViewModels } from '../models/post.view.models';
 import {
   Reaction,
@@ -30,14 +29,11 @@ export class PostRepository {
     }
   }
 
-  async updatePostId(
-    postId: string,
-    createPostForBlogDto: CreatePostForBlogDto,
-  ): Promise<boolean> {
+  async updatePostId(postId: string, createPostDto): Promise<boolean> {
     try {
       await this.PostModel.findOneAndUpdate(
         { id: postId },
-        { $set: createPostForBlogDto },
+        { $set: createPostDto },
       );
       return true;
     } catch (e) {
@@ -56,17 +52,18 @@ export class PostRepository {
 
     if (!post) return null;
 
+    let myStatus = myStatusView.None;
+
     if (userId) {
       const userLikePost = await this.getUserLikePost(postId, userId);
-      if (userLikePost) {
-        post.extendedLikesInfo.myStatus = userLikePost.status;
-      }
+
+      myStatus = userLikePost ? userLikePost.status : myStatusView.None;
     }
 
-    const newestLike = await this.reactionRepository.newestLike(postId);
+    const newestLike = await this.reactionRepository.newestLike(postId, 3);
 
     const newestLikeMap = newestLike.map((el) => ({
-      addedAt: el.createAt,
+      addedAt: el.createdAt,
       userId: el.userId,
       login: el.userLogin,
     }));
@@ -75,6 +72,7 @@ export class PostRepository {
       ...post,
       extendedLikesInfo: {
         ...post.extendedLikesInfo,
+        myStatus,
         newestLikes: newestLikeMap,
       },
     };
@@ -91,7 +89,7 @@ export class PostRepository {
     postId: string,
     userId: string | null,
   ): Promise<Reaction | null> {
-    return this.ReactionModel.findOne({ id: postId, userId });
+    return this.ReactionModel.findOne({ postId, userId });
   }
 
   async updatePostIdLikeStatus(
@@ -106,7 +104,7 @@ export class PostRepository {
     await this.ReactionModel.updateOne(
       { postId, userId },
       {
-        $set: { status, createAt: new Date().toISOString(), userLogin },
+        $set: { status, createdAt: new Date().toISOString(), userLogin },
       },
       { upsert: true },
     );

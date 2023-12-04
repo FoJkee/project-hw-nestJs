@@ -22,6 +22,8 @@ import { PaginationView } from '../../pagination/pagination';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 import { Blog } from '../models/blog.schema';
+import { UserId } from '../../decorators/userId.decorator';
+import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
 
 @Controller('blogs')
 export class BlogController {
@@ -47,12 +49,14 @@ export class BlogController {
   }
 
   @Get(':blogId/posts')
+  @UseGuards(BearerUserIdGuard)
   async getPostForBlog(
     @Param('blogId') blogId: string,
     @Query() queryDto: QueryDto,
+    @UserId() userId: string | null,
   ): Promise<PaginationView<PostViewModels[]> | null> {
     try {
-      return await this.blogService.getPostForBlog(queryDto, blogId);
+      return await this.blogService.getPostForBlog(queryDto, blogId, userId);
     } catch (e) {
       throw new NotFoundException();
     }
@@ -65,17 +69,9 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostViewModels | null> {
-    try {
-      const blog = await this.blogService.findBlogId(blogId);
-      if (!blog) return null;
-      return await this.postService.createPost(
-        createPostDto,
-        blogId,
-        blog.name,
-      );
-    } catch {
-      throw new NotFoundException();
-    }
+    const blog = await this.blogService.findBlogId(blogId);
+    if (!blog) throw new NotFoundException();
+    return await this.postService.createPost(createPostDto, blogId, blog.name);
   }
 
   @Get(':blogId')

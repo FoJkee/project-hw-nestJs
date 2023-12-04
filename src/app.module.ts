@@ -41,6 +41,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtServicess } from './auth/jwt/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerConfigService } from './config/mailer.config';
+import { BlogValidator } from './validators/blog.validator';
 
 const repositories = [
   BlogRepository,
@@ -68,7 +69,12 @@ const services = [
   JwtService,
 ];
 
-const settings = [BasicAuthGuard, LoginValidator, EmailValidator];
+const settings = [
+  BasicAuthGuard,
+  LoginValidator,
+  EmailValidator,
+  BlogValidator,
+];
 
 const controllers = [
   AppController,

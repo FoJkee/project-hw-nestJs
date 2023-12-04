@@ -15,9 +15,9 @@ export class Reaction {
   @Prop({ required: true, type: String })
   commentId: string;
   @Prop({ required: true, type: String })
-  createAt: string;
+  createdAt: string;
   @Prop({ required: true, type: String, enum: myStatusView })
   status: myStatusView;
 }
-
+//entityId:
 export const ReactionSchema = SchemaFactory.createForClass(Reaction);

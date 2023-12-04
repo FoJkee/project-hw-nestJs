@@ -58,9 +58,13 @@ export class BlogService {
     return this.blogRepository.updateBlogId(createBlogDto, blogId);
   }
 
-  async getPostForBlog(queryDto: QueryDto, blogId: string) {
+  async getPostForBlog(
+    queryDto: QueryDto,
+    blogId: string,
+    userId: string | null,
+  ) {
     const blog = await this.blogRepository.findBlogId(blogId);
     if (!blog) throw new NotFoundException();
-    return this.blogQueryRepository.getPostForBlog(queryDto, blogId);
+    return this.blogQueryRepository.getPostForBlog(queryDto, blogId, userId);
   }
 }
