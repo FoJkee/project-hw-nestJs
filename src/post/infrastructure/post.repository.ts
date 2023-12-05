@@ -9,6 +9,7 @@ import {
   ReactionDocument,
 } from '../../reaction/models/reaction.schema';
 import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
+import { CreatePostForBlogDto } from '../dto/post.dto';
 
 @Injectable()
 export class PostRepository {
@@ -29,11 +30,14 @@ export class PostRepository {
     }
   }
 
-  async updatePostId(postId: string, createPostDto): Promise<boolean> {
+  async updatePostId(
+    postId: string,
+    createPostForBlogDto: CreatePostForBlogDto,
+  ): Promise<boolean> {
     try {
       await this.PostModel.findOneAndUpdate(
         { id: postId },
-        { $set: createPostDto },
+        { $set: createPostForBlogDto },
       );
       return true;
     } catch (e) {
@@ -72,7 +76,7 @@ export class PostRepository {
       ...post,
       extendedLikesInfo: {
         ...post.extendedLikesInfo,
-        myStatus,
+        myStatus: myStatus,
         newestLikes: newestLikeMap,
       },
     };

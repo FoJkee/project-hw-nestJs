@@ -1,14 +1,14 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../models/post.schema';
-import { Model, Promise } from 'mongoose';
+import { Model } from 'mongoose';
 import { pagination, PaginationView } from '../../pagination/pagination';
-import { PostViewModels } from '../models/post.view.models';
 import { Comment, CommentDocument } from '../../comment/models/comment.schema';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { PostRepository } from './post.repository';
 import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
 import { CommentRepository } from '../../comment/infrastructure/comment.repository';
+import { myStatusView, PostViewModels } from '../models/post.view.models';
 
 export class PostQueryRepository {
   constructor(
@@ -33,58 +33,41 @@ export class PostQueryRepository {
     )
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
       .skip(pageSize * (pageNumber - 1))
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
 
-    const items = post.map(async (el) => {
-      // let myStatus = myStatusView.None;
-      if (userId) {
-        const userLikePost = await this.postRepository.getUserLikePost(
-          el.id,
-          userId,
-        );
-        if (userLikePost) {
-          // myStatus = userLikePost ? userLikePost.status : myStatusView.None;
-
-          el.extendedLikesInfo.myStatus = userLikePost.status;
+    const items = await Promise.all(
+      post.map(async (el) => {
+        let myStatus = myStatusView.None;
+        if (userId) {
+          const userLikePost = await this.postRepository.getUserLikePost(
+            el.id,
+            userId,
+          );
+          if (userLikePost) {
+            myStatus = el.extendedLikesInfo.myStatus
+              ? userLikePost.status
+              : myStatusView.None;
+          }
         }
-      }
+        const newestLike = await this.reactionRepository.newestLike(el.id, 3);
 
-      const newestLike = await this.reactionRepository.newestLike(el.id, 3);
+        const newestLikeMap = newestLike.map((el) => ({
+          addedAt: el.createdAt,
+          userId: el.userId,
+          login: el.userLogin,
+        }));
 
-      const newestLikeMap = newestLike.map((el) => ({
-        addedAt: el.createdAt,
-        userId: el.userId,
-        login: el.userLogin,
-      }));
-
-      return {
-        ...el,
-        extendedLikesInfo: {
-          ...el.extendedLikesInfo,
-          newestLikes: newestLikeMap,
-        },
-      };
-    });
-
-    // const getPosts = post.map((el) => ({
-    //   id: el.id,
-    //   title: el.title,
-    //   shortDescription: el.shortDescription,
-    //   content: el.content,
-    //   blogId: el.blogId,
-    //   blogName: el.blogName,
-    //   createdAt: el.createdAt,
-    //   extendedLikesInfo: {
-    //     likesCount: el.extendedLikesInfo.likesCount,
-    //     dislikesCount: el.extendedLikesInfo.dislikesCount,
-    //     myStatus: el.extendedLikesInfo.myStatus,
-    //     newestLikes: el.extendedLikesInfo.newestLikes.map((post) => ({
-    //       addedAt: post.addedAt,
-    //       userId: post.userId,
-    //       login: post.login,
-    //     })),
-    //   },
-    // }));
+        return {
+          ...el,
+          extendedLikesInfo: {
+            ...el.extendedLikesInfo,
+            myStatus: myStatus,
+            newestLikes: newestLikeMap,
+          },
+        };
+      }),
+    );
 
     const countDocument = await this.PostModel.countDocuments();
 
@@ -93,7 +76,7 @@ export class PostQueryRepository {
       page: pageNumber,
       pageSize: pageSize,
       totalCount: countDocument,
-      items: post,
+      items: items,
     };
   }
 
@@ -116,17 +99,23 @@ export class PostQueryRepository {
     })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
       .skip(pageSize * (pageNumber - 1))
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
 
-    await comment.map(async (el) => {
-      if (userId) {
-        const findUserLikeStatus =
-          await this.commentRepository.getUserLikeComment(el.id, userId);
-        if (findUserLikeStatus) {
-          el.likesInfo.myStatus = findUserLikeStatus.status;
+    const result = await Promise.all(
+      comment.map(async (com) => {
+        let myStatus = myStatusView.None;
+        if (userId) {
+          const findUserLikeStatus =
+            await this.commentRepository.getUserLikeComment(com.id, userId);
+          if (findUserLikeStatus)
+            myStatus = com.likesInfo.myStatus
+              ? findUserLikeStatus.status
+              : myStatusView.None;
         }
-      }
-    });
+        return { ...com, likesInfo: { ...com.likesInfo, myStatus: myStatus } };
+      }),
+    );
 
     const countDocument = await this.CommentModel.countDocuments(filter);
 
@@ -135,7 +124,7 @@ export class PostQueryRepository {
       page: pageNumber,
       pageSize: pageSize,
       totalCount: countDocument,
-      items: comment,
+      items: result,
     };
   }
 }

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Post } from '../models/post.schema';
-import { CreatePostDto } from '../dto/post.dto';
+import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { PostRepository } from './post.repository';
@@ -29,10 +29,7 @@ export class PostService {
     private readonly commentRepository: CommentRepository,
   ) {}
 
-  async getPosts(
-    queryDto: QueryDto,
-    userId: string,
-  ): Promise<PaginationView<PostViewModels[]>> {
+  async getPosts(queryDto: QueryDto, userId: string) {
     return this.postQueryRepository.getPosts(queryDto, userId);
   }
 
@@ -66,10 +63,13 @@ export class PostService {
     // },
   }
 
-  async updatePostId(postId: string, createPostDto: CreatePostDto) {
+  async updatePostId(
+    postId: string,
+    createPostForBlogDto: CreatePostForBlogDto,
+  ) {
     const post = await this.postRepository.getPostId(postId, null);
     if (!post) throw new NotFoundException();
-    return this.postRepository.updatePostId(postId, createPostDto);
+    return this.postRepository.updatePostId(postId, createPostForBlogDto);
   }
 
   async getPostId(

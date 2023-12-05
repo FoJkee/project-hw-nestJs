@@ -83,7 +83,12 @@ export class CommentRepository {
 
     await this.CommentModel.updateOne(
       { id: comment.id },
-      { $set: { ...comment, likesInfo: status } },
+      {
+        $set: {
+          ...comment,
+          likesInfo: { ...comment.likesInfo, myStatus: status },
+        },
+      },
     );
     return true;
   }

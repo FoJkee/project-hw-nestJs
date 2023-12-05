@@ -82,11 +82,11 @@ export class PostController {
   @HttpCode(204)
   async updatePost(
     @Param('postId') postId: string,
-    @Body() createPostDto: CreatePostDto,
+    @Body() createPostForBlogDto: CreatePostForBlogDto,
   ) {
     const updatePost = await this.postService.updatePostId(
       postId,
-      createPostDto,
+      createPostForBlogDto,
     );
     if (!updatePost) throw new NotFoundException();
     return;
