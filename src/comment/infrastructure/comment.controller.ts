@@ -16,14 +16,10 @@ import { Reaction } from '../../reaction/dto/reaction.dto';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
 import { UserId } from '../../decorators/userId.decorator';
-import { CommentRepository } from './comment.repository';
 
 @Controller('comments')
 export class CommentController {
-  constructor(
-    private readonly commentService: CommentService,
-    private readonly commentRepository: CommentRepository,
-  ) {}
+  constructor(private readonly commentService: CommentService) {}
 
   @Get(':commentId')
   @UseGuards(BearerUserIdGuard)

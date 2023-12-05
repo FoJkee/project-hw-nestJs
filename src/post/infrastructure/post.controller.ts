@@ -12,7 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreatePostDto, CreatePostForBlogDto } from '../dto/post.dto';
+import { CreatePostForBlogDto } from '../dto/post.dto';
 import { PostService } from './post.service';
 import { BlogService } from '../../blog/infrastructure/blog.service';
 import { CommentViewModels } from '../../comment/models/comment.view.models';
@@ -27,14 +27,12 @@ import { UserId } from '../../decorators/userId.decorator';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
-import { PostRepository } from './post.repository';
 
 @Controller('posts')
 export class PostController {
   constructor(
     private readonly postService: PostService,
     private readonly blogService: BlogService,
-    private readonly postRepository: PostRepository,
   ) {}
 
   @Get()
