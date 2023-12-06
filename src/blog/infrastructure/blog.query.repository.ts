@@ -12,7 +12,9 @@ import {
 } from '../../post/models/post.view.models';
 import { ReactionRepository } from '../../reaction/infrastructure/reaction.repository';
 import { PostRepository } from '../../post/infrastructure/post.repository';
+import { Injectable, Scope } from '@nestjs/common';
 
+@Injectable({ scope: Scope.REQUEST })
 export class BlogQueryRepository {
   constructor(
     @InjectModel(Blog.name) private readonly BlogModel: Model<BlogDocument>,

@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Scope,
   UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
@@ -25,7 +26,7 @@ import { Blog } from '../models/blog.schema';
 import { UserId } from '../../decorators/userId.decorator';
 import { BearerUserIdGuard } from '../../guard/bearer.userId.guard';
 
-@Controller('blogs')
+@Controller({ path: '/blogs', scope: Scope.REQUEST })
 export class BlogController {
   constructor(
     private blogService: BlogService,

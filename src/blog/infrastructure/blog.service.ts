@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Scope,
 } from '@nestjs/common';
 import { Blog } from '../models/blog.schema';
 import { CreateBlogDto } from '../dto/blog.dto';
@@ -13,7 +14,7 @@ import { PaginationView } from '../../pagination/pagination';
 import { QueryDto } from '../../pagination/pagination.query.dto';
 import { randomUUID } from 'crypto';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class BlogService {
   constructor(
     private readonly blogRepository: BlogRepository,
