@@ -9,4 +9,6 @@ export default () => ({
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
   email_from: process.env.EMAIL,
   pass_from: process.env.PASS,
+  throttler_ttl: process.env.THROTTLE_TTL || 10,
+  throttler_limit: process.env.THROTTLE_LIMIT || 5,
 });

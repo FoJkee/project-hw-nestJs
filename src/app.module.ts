@@ -42,6 +42,8 @@ import { JwtServicess } from './auth/jwt/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerConfigService } from './config/mailer.config';
 import { BlogValidator } from './validators/blog.validator';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerConfigService } from './config/throttle.config';
 
 const repositories = [
   BlogRepository,
@@ -101,6 +103,7 @@ const schemas = [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
+    ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
     MongooseModule.forFeature(schemas),
   ],
   controllers: [...controllers],

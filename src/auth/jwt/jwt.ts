@@ -16,12 +16,12 @@ export class JwtServicess {
   async createAccessAndRefreshToken(deviceId: string, userId: string) {
     const accessToken = this.jwtService.sign(
       { userId },
-      { secret: this.accessJwtSecret, expiresIn: '2h' },
+      { secret: this.accessJwtSecret, expiresIn: '10000' },
     );
     const refreshToken = this.jwtService.sign(
       { userId, deviceId },
 
-      { secret: this.refreshJwtToken, expiresIn: '2h' },
+      { secret: this.refreshJwtToken, expiresIn: '20000' },
     );
     return { accessToken, refreshToken };
   }

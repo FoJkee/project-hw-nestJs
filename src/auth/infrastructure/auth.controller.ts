@@ -29,7 +29,9 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dto';
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -77,7 +79,6 @@ export class AuthController {
     @Req() req: Request,
     @User() user: UserEntity,
     @RefreshTokenDecorator() deviceDto: DeviceDto,
-    //@CurrentUserIdAndDeviceId() dto : {userId: string, deviceId: string}
   ) {
     const refreshToken = req.user;
     if (!refreshToken) throw new UnauthorizedException();
@@ -102,6 +103,7 @@ export class AuthController {
   // }
 
   @Post('refresh-token')
+  @HttpCode(200)
   async refresh_Token(
     @RefreshToken() token: string,
     @Res({ passthrough: true }) res: Response,
