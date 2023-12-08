@@ -14,16 +14,15 @@ export class SecurityDevicesRepository {
   async getDeviceId(deviceId: string): Promise<Device | null> {
     return this.DeviceModel.findOne({ deviceId });
   }
-  async deleteDeviceSessionUserId(
-    deviceId: string,
-    userId: string,
-    // lastActiveDate: string,
-  ) {
+  async deleteDeviceSessionUserId(deviceId: string, userId: string) {
     return this.DeviceModel.findOneAndDelete({
       deviceId,
       userId,
-      // lastActiveDate,
     });
+  }
+
+  async findDeviceUserId(deviceId: string, userId: string) {
+    return this.DeviceModel.findOne({ deviceId, userId });
   }
 
   async getDeviceAllSessionUserId(
@@ -58,10 +57,10 @@ export class SecurityDevicesRepository {
     }
   }
 
-  async updateDevice(userId: string, deviceId: string, newDataToken: string) {
+  async updateDevice(userId: string, deviceId: string, lastActiveDate: string) {
     return this.DeviceModel.findOneAndUpdate(
-      { userId, deviceId },
-      { $set: { lastActiveDate: newDataToken } },
+      { userId },
+      { $set: { lastActiveDate, deviceId } },
     );
   }
 }

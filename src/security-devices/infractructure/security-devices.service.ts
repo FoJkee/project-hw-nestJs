@@ -23,16 +23,15 @@ export class SecurityDevicesService {
     return this.securityDevicesRepository.getDeviceAllSessionUserId(userId);
   }
 
-  async deleteDeviceSessionUserId(
-    deviceId: string,
-    userId: string,
-    // lastActiveDate: string,
-  ) {
+  async deleteDeviceSessionUserId(deviceId: string, userId: string) {
     return this.securityDevicesRepository.deleteDeviceSessionUserId(
       deviceId,
       userId,
-      // lastActiveDate,
     );
+  }
+
+  async findDeviceUserId(deviceId: string, userId: string) {
+    return this.securityDevicesRepository.findDeviceUserId(deviceId, userId);
   }
 
   async deleteDeviceId(deviceId: string, userId: string) {
@@ -49,11 +48,11 @@ export class SecurityDevicesService {
     );
   }
 
-  async updateDevice(userId: string, deviceId: string, newDataToken: string) {
+  async updateDevice(userId: string, deviceId: string, lastActiveDate: string) {
     return this.securityDevicesRepository.updateDevice(
       userId,
       deviceId,
-      newDataToken,
+      lastActiveDate,
     );
   }
 }

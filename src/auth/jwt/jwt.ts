@@ -15,16 +15,33 @@ export class JwtServicess {
 
   async createAccessAndRefreshToken(deviceId: string, userId: string) {
     const accessToken = this.jwtService.sign(
-      { userId },
-      { secret: this.accessJwtSecret, expiresIn: '10000' },
+      { userId, deviceId },
+      { secret: this.accessJwtSecret, expiresIn: '100000' },
     );
     const refreshToken = this.jwtService.sign(
       { userId, deviceId },
 
-      { secret: this.refreshJwtToken, expiresIn: '20000' },
+      { secret: this.refreshJwtToken, expiresIn: '200000' },
     );
     return { accessToken, refreshToken };
   }
+
+  // async createAccessToken(userId: string, deviceId: string) {
+  //   const accessToken = this.jwtService.sign(
+  //     { userId, deviceId },
+  //     { secret: this.accessJwtSecret, expiresIn: '100000' },
+  //   );
+  //   return accessToken;
+  // }
+  //
+  // async createRefreshToken(userId: string, deviceId: string) {
+  //   const refreshToken = this.jwtService.sign(
+  //     { userId, deviceId },
+  //
+  //     { secret: this.refreshJwtToken, expiresIn: '200000' },
+  //   );
+  //   return refreshToken;
+  // }
 
   async getLastActiveDateFromToken(token: string) {
     const result: any = this.jwtService.decode(token);

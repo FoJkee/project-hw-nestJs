@@ -16,14 +16,14 @@ export class RefreshTokenGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const refreshToken = request.cookies.refreshToken;
-    console.log('refreshToken', refreshToken);
     if (!refreshToken) throw new UnauthorizedException();
     const dataToken = await this.jwtService.verifyRefreshToken(refreshToken);
     if (!dataToken) throw new UnauthorizedException();
     const user = await this.userRepository.findUserId(dataToken.userId);
     if (!user) throw new UnauthorizedException();
-    request.refreshTokenDecoratorJwt = dataToken;
     request.user = user;
+    request.refreshTokenDecoratorJwt = dataToken;
+
     return true;
   }
 }

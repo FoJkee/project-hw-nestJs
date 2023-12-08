@@ -5,7 +5,6 @@ import {
   HttpCode,
   Ip,
   Post,
-  Req,
   Res,
   UnauthorizedException,
   UseGuards,
@@ -13,7 +12,7 @@ import {
 
 import { LoginDto } from '../dto/login.dto';
 import { DeviceName } from '../../decorators/deviceName.decorator';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RefreshTokenGuard } from '../../guard/refreshToken.guard';
 import { UserEntity } from '../../user/models/user.schema';
@@ -71,40 +70,25 @@ export class AuthController {
     };
   }
 
-  @Post('/logout')
   @UseGuards(RefreshTokenGuard)
+  @Post('/logout')
   @HttpCode(204)
   async logout(
-    @Res({ passthrough: true }) res: Response,
-    @Req() req: Request,
-    @User() user: UserEntity,
     @RefreshTokenDecorator() deviceDto: DeviceDto,
+    @User() user: UserEntity,
+    @RefreshToken() token: string,
+    // @Req() req: Request,
+    // @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.user;
-    if (!refreshToken) throw new UnauthorizedException();
-    const result = await this.authService.logout(deviceDto.deviceId, user.id);
+    const result = await this.authService.logout(deviceDto, user.id, token);
     if (!result) throw new UnauthorizedException();
-    res.clearCookie('refreshToken');
+    // res.clearCookie('refreshToken');
     return;
   }
 
-  // @Post('/logout')
-  // @HttpCode(204)
-  // async logout(
-  //   @RefreshToken() token: string,
-  //   @User() user: UserEntity,
-  //   @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   const dataToken = await this.jwtService.verifyRefreshToken(token);
-  //   console.log('dataToken', dataToken);
-  //   if (!dataToken) throw new UnauthorizedException();
-  //   await this.authService.logout(dataToken.deviceId, dataToken.userId);
-  //   return res.clearCookie('refreshToken');
-  // }
-
   @Post('refresh-token')
   @HttpCode(200)
-  async refresh_Token(
+  async refreshToken(
     @RefreshToken() token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -121,6 +105,27 @@ export class AuthController {
       throw new UnauthorizedException();
     }
   }
+
+  // @Post('refresh-token')
+  // @HttpCode(200)
+  // async refreshToken(
+  //   @RefreshToken() token: string,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   try {
+  //     const tokenData = await this.authService.refreshToken(token);
+  //     if (!tokenData) return null;
+  //     const { accessToken, newRefreshToken } = tokenData;
+  //
+  //     res.cookie('refreshToken', newRefreshToken, {
+  //       httpOnly: true,
+  //       secure: true,
+  //     });
+  //     return { accessToken: accessToken };
+  //   } catch (e) {
+  //     throw new UnauthorizedException();
+  //   }
+  // }
 
   @Post('registration')
   @HttpCode(204)

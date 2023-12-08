@@ -13,6 +13,7 @@ import { RegistrationDto } from '../dto/registration.dto';
 import { EmailService } from '../../email/email.service';
 import { NewPasswordDto } from '../dto/newpassword.dto';
 import { UserRepository } from '../../user/infrastructure/user.repository';
+import { DeviceDto } from '../../security-devices/dto/device.dto';
 
 @Injectable()
 export class AuthService {
@@ -50,36 +51,76 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async logout(deviceId: string, userId: string) {
-    // const lastActiveDate: any = new Date(deviceDto.iat * 1000).toISOString();
+  async logout(deviceDto: DeviceDto, userId: string, token: string) {
+    const dataToken = await this.jwtService.verifyRefreshToken(token);
+    if (!dataToken) throw new UnauthorizedException();
+
     return this.securityDevicesService.deleteDeviceSessionUserId(
-      deviceId,
-      userId,
-      // lastActiveDate,
+      dataToken.deviceId,
+      dataToken.userId,
     );
   }
 
   async refreshToken(token: string) {
+    const activeToken = await this.jwtService.getLastActiveDateFromToken(token);
+    if (!activeToken) throw new UnauthorizedException();
+
     const dataToken = await this.jwtService.verifyRefreshToken(token);
     if (!dataToken) throw new UnauthorizedException();
-    const userId = dataToken.userId;
-    const deviceId = dataToken.deviceId;
+
     const user = await this.userService.findUserId(dataToken.userId);
     if (!user) throw new UnauthorizedException();
+    const findDeviceUser = await this.securityDevicesService.findDeviceUserId(
+      dataToken.deviceId,
+      dataToken.userId,
+    );
+    if (!findDeviceUser) throw new UnauthorizedException();
 
     const { accessToken, refreshToken } =
-      await this.jwtService.createAccessAndRefreshToken(deviceId, userId);
+      await this.jwtService.createAccessAndRefreshToken(
+        dataToken.deviceId,
+        dataToken.userId,
+      );
 
     const newDataToken =
       await this.jwtService.getLastActiveDateFromToken(refreshToken);
+
     await this.securityDevicesService.updateDevice(
       user.id,
       dataToken.deviceId,
       newDataToken,
     );
-
     return { accessToken, refreshToken };
   }
+
+  // async refreshToken(token: string) {
+  //   const activeToken = await this.jwtService.getLastActiveDateFromToken(token);
+  //   if (!activeToken) throw new UnauthorizedException();
+  //
+  //   const dataToken = await this.jwtService.verifyRefreshToken(token);
+  //   if (!dataToken) throw new UnauthorizedException();
+  //   const user = await this.userService.findUserId(dataToken.userId);
+  //   if (!user) throw new UnauthorizedException();
+  //
+  //   const accessToken = await this.jwtService.createAccessToken(
+  //     user.id,
+  //     dataToken.deviceId,
+  //   );
+  //   const newRefreshToken = await this.jwtService.createRefreshToken(
+  //     user.id,
+  //     dataToken.deviceId,
+  //   );
+  //
+  //   const newDataToken =
+  //     await this.jwtService.getLastActiveDateFromToken(newRefreshToken);
+  //
+  //   await this.securityDevicesService.updateDevice(
+  //     user.id,
+  //     dataToken.deviceId,
+  //     newDataToken,
+  //   );
+  //   return { accessToken, newRefreshToken };
+  // }
 
   async registration(registrationDto: RegistrationDto) {
     const newUser = await this.userService.createUser(registrationDto);
