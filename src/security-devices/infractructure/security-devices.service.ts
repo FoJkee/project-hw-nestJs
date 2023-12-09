@@ -19,7 +19,7 @@ export class SecurityDevicesService {
     return this.securityDevicesRepository.createNewDevice(newDevice);
   }
 
-  async getDeviceAllSessionUserId(userId: string) {
+  async getDeviceAllSessionUserId(userId: string): Promise<DeviceViewModels[]> {
     return this.securityDevicesRepository.getDeviceAllSessionUserId(userId);
   }
 

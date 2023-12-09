@@ -14,17 +14,15 @@ import { DeviceViewModels } from '../models/device.view.models';
 import { RefreshTokenDecorator } from '../../decorators/refreshtoken.decorator';
 import { DeviceDto } from '../dto/device.dto';
 
-@Controller('/security')
+@Controller('security')
 export class SecurityDevicesController {
   constructor(
     private readonly securityDevicesService: SecurityDevicesService,
   ) {}
 
-  @Get('/devices')
+  @Get('devices')
   @UseGuards(RefreshTokenGuard)
-  async getDevice(
-    @User() user: UserEntity,
-  ): Promise<DeviceViewModels[] | null> {
+  async getDevice(@User() user: UserEntity): Promise<DeviceViewModels[]> {
     return this.securityDevicesService.getDeviceAllSessionUserId(user.id);
   }
 

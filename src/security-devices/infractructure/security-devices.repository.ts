@@ -25,10 +25,8 @@ export class SecurityDevicesRepository {
     return this.DeviceModel.findOne({ deviceId, userId });
   }
 
-  async getDeviceAllSessionUserId(
-    userId: string,
-  ): Promise<DeviceViewModels[] | null> {
-    return this.DeviceModel.findOne({ userId }, { _id: 0 });
+  async getDeviceAllSessionUserId(userId: string): Promise<DeviceViewModels[]> {
+    return this.DeviceModel.find({ userId }, { _id: 0, __v: 0, userId: 0 });
   }
   async createNewDevice(
     newDevice: DeviceViewModels,
@@ -48,8 +46,8 @@ export class SecurityDevicesRepository {
   async deleteAllOtherSession(deviceId: string, userId: string) {
     try {
       await this.DeviceModel.findOneAndDelete({
-        deviceId: { $ne: deviceId },
         userId,
+        deviceId: { $ne: deviceId },
       });
       return true;
     } catch (e) {
