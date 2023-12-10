@@ -103,7 +103,13 @@ const schemas = [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
-    ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
+    // ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     MongooseModule.forFeature(schemas),
   ],
   controllers: [...controllers],

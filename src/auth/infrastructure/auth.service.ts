@@ -51,13 +51,14 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async logout(deviceDto: DeviceDto, userId: string, token: string) {
-    const dataToken = await this.jwtService.verifyRefreshToken(token);
-    if (!dataToken) throw new UnauthorizedException();
+  async logout(deviceDto: DeviceDto, userId: string) {
+    // const dataToken = await this.jwtService.verifyRefreshToken(token);
+    // if (!dataToken) throw new UnauthorizedException();
+    // const lastActiveDate = new Date(deviceDto.iat * 1000).toISOString();
 
     return this.securityDevicesService.deleteDeviceSessionUserId(
-      dataToken.deviceId,
-      dataToken.userId,
+      deviceDto.deviceId,
+      userId,
     );
   }
 

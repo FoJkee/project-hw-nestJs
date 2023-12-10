@@ -28,14 +28,13 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dto';
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
-import { SkipThrottle } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
-@SkipThrottle()
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
   @Post('login')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(200)
   async login(
     @Body() loginDto: LoginDto,
@@ -70,8 +69,8 @@ export class AuthController {
     };
   }
 
-  @UseGuards(RefreshTokenGuard)
   @Post('/logout')
+  @UseGuards(RefreshTokenGuard)
   @HttpCode(204)
   async logout(
     @RefreshTokenDecorator() deviceDto: DeviceDto,
@@ -80,7 +79,7 @@ export class AuthController {
     // @Req() req: Request,
     // @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.logout(deviceDto, user.id, token);
+    const result = await this.authService.logout(deviceDto, user.id);
     if (!result) throw new UnauthorizedException();
     // res.clearCookie('refreshToken');
     return;
@@ -126,8 +125,8 @@ export class AuthController {
   //     throw new UnauthorizedException();
   //   }
   // }
-
   @Post('registration')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async registration(@Body() registrationDto: RegistrationDto) {
     return this.authService.registration(registrationDto);
@@ -144,8 +143,8 @@ export class AuthController {
   async newPassword(@Body() newPasswordDto: NewPasswordDto) {
     return this.authService.newPassword(newPasswordDto);
   }
-
   @Post('registration-confirmation')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async registrationConfirmation(
     @Body() registrationConfirmationDto: RegistrationConfirmationDto,
@@ -154,8 +153,8 @@ export class AuthController {
       registrationConfirmationDto.code,
     );
   }
-
   @Post('registration-email-resending')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async registrationEmailResending(
     @Body() registrationEmailResending: RegistrationEmailResending,
