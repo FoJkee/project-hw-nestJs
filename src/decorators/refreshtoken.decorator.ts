@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DeviceDto } from '../security-devices/dto/device.dto';
 
 export const RefreshTokenDecorator = createParamDecorator(
@@ -9,8 +13,11 @@ export const RefreshTokenDecorator = createParamDecorator(
 );
 
 export const RefreshToken = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
+  (data: unknown, ctx: ExecutionContext): boolean => {
     const request = ctx.switchToHttp().getRequest();
     return request.cookies.refreshToken;
+    // const refreshToken = request.cookies.refreshToken;
+    // if (!refreshToken) throw new UnauthorizedException();
+    // return true;
   },
 );

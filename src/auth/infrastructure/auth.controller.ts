@@ -29,10 +29,14 @@ import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dt
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { JwtServicess } from '../jwt/jwt';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtServicess,
+  ) {}
   @Post('login')
   @UseGuards(ThrottlerGuard)
   @HttpCode(200)
@@ -75,34 +79,40 @@ export class AuthController {
   async logout(
     @RefreshTokenDecorator() deviceDto: DeviceDto,
     @User() user: UserEntity,
-    @RefreshToken() token: string,
+    // @RefreshToken() token: string,
     // @Req() req: Request,
-    // @Res({ passthrough: true }) res: Response,
+    // @Res() res: Response,
   ) {
+    // const refreshToken = req.cookies.refreshToken;
+    //
+    // const dataToken = await this.jwtService.verifyRefreshToken(refreshToken);
+    // if (!dataToken) throw new UnauthorizedException();
+
     const result = await this.authService.logout(deviceDto, user.id);
     if (!result) throw new UnauthorizedException();
-    // res.clearCookie('refreshToken');
     return;
   }
 
   @Post('refresh-token')
+  @UseGuards(RefreshTokenGuard)
   @HttpCode(200)
   async refreshToken(
     @RefreshToken() token: string,
+    // @RefreshTokenDecorator() token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    try {
-      const { accessToken, refreshToken } =
-        await this.authService.refreshToken(token);
+    // const result = await this.authService.refreshToken(token);
+    // if (!result) return null;
+    // const { accessToken, refreshToken } = result;
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-      });
-      return { accessToken: accessToken };
-    } catch (e) {
-      throw new UnauthorizedException();
-    }
+    const { accessToken, refreshToken } =
+      await this.authService.refreshToken(token);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: accessToken };
   }
 
   // @Post('refresh-token')
@@ -164,13 +174,3 @@ export class AuthController {
     );
   }
 }
-
-// @Post('refresh-token')
-// async refreshToken(@RefreshToken() token: string) {
-//   const dataToken = await this.jwtService.verifyRefreshToken(token);
-//   if (!dataToken) throw new UnauthorizedException();
-//   await this.securityDevicesService.deleteDeviceId(
-//     dataToken.deviceId,
-//     dataToken.userId,
-//   );
-// }

@@ -23,15 +23,28 @@ export class SecurityDevicesService {
     return this.securityDevicesRepository.getDeviceAllSessionUserId(userId);
   }
 
-  async deleteDeviceSessionUserId(deviceId: string, userId: string) {
+  async deleteDeviceSessionUserId(
+    deviceId: string,
+    userId: string,
+    lastActiveDate: string,
+  ) {
     return this.securityDevicesRepository.deleteDeviceSessionUserId(
       deviceId,
       userId,
+      lastActiveDate,
     );
   }
 
-  async findDeviceUserId(deviceId: string, userId: string) {
-    return this.securityDevicesRepository.findDeviceUserId(deviceId, userId);
+  async findDeviceUserId(
+    deviceId: string,
+    userId: string,
+    lastActiveDate: string,
+  ) {
+    return this.securityDevicesRepository.findDeviceUserId(
+      deviceId,
+      userId,
+      lastActiveDate,
+    );
   }
 
   async deleteDeviceId(deviceId: string, userId: string) {

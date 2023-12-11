@@ -52,28 +52,29 @@ export class AuthService {
   }
 
   async logout(deviceDto: DeviceDto, userId: string) {
-    // const dataToken = await this.jwtService.verifyRefreshToken(token);
-    // if (!dataToken) throw new UnauthorizedException();
-    // const lastActiveDate = new Date(deviceDto.iat * 1000).toISOString();
-
+    const lastActiveDate = new Date(deviceDto.iat * 1000).toISOString();
     return this.securityDevicesService.deleteDeviceSessionUserId(
       deviceDto.deviceId,
       userId,
+      lastActiveDate,
     );
   }
 
-  async refreshToken(token: string) {
-    const activeToken = await this.jwtService.getLastActiveDateFromToken(token);
-    if (!activeToken) throw new UnauthorizedException();
-
+  async refreshToken(
+    token: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const dataToken = await this.jwtService.verifyRefreshToken(token);
     if (!dataToken) throw new UnauthorizedException();
 
     const user = await this.userService.findUserId(dataToken.userId);
     if (!user) throw new UnauthorizedException();
+
+    const lastActiveDate = new Date(dataToken.iat * 1000).toISOString();
+
     const findDeviceUser = await this.securityDevicesService.findDeviceUserId(
       dataToken.deviceId,
       dataToken.userId,
+      lastActiveDate,
     );
     if (!findDeviceUser) throw new UnauthorizedException();
 
@@ -87,7 +88,7 @@ export class AuthService {
       await this.jwtService.getLastActiveDateFromToken(refreshToken);
 
     await this.securityDevicesService.updateDevice(
-      user.id,
+      dataToken.userId,
       dataToken.deviceId,
       newDataToken,
     );

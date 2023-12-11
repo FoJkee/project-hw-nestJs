@@ -16,12 +16,12 @@ export class JwtServicess {
   async createAccessAndRefreshToken(deviceId: string, userId: string) {
     const accessToken = this.jwtService.sign(
       { userId, deviceId },
-      { secret: this.accessJwtSecret, expiresIn: '10000' },
+      { secret: this.accessJwtSecret, expiresIn: '1000000' },
     );
     const refreshToken = this.jwtService.sign(
       { userId, deviceId },
 
-      { secret: this.refreshJwtToken, expiresIn: '20000' },
+      { secret: this.refreshJwtToken, expiresIn: '2000000' },
     );
     return { accessToken, refreshToken };
   }
@@ -48,15 +48,24 @@ export class JwtServicess {
     return new Date(result.iat * 1000).toISOString();
   }
 
-  async verifyRefreshToken(token: string) {
+  // async verifyRefreshToken(token: string) {
+  //   try {
+  //     const res: any = await this.jwtService.verifyAsync(token, {
+  //       secret: this.refreshJwtToken,
+  //     });
+  //     return {
+  //       userId: res.userId,
+  //       deviceId: res.deviceId,
+  //     };
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
+  async verifyRefreshToken(refreshToken: string) {
     try {
-      const res: any = await this.jwtService.verifyAsync(token, {
+      return await this.jwtService.verifyAsync(refreshToken, {
         secret: this.refreshJwtToken,
       });
-      return {
-        userId: res.userId,
-        deviceId: res.deviceId,
-      };
     } catch (e) {
       return null;
     }

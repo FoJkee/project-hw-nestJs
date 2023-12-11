@@ -23,7 +23,6 @@ export class RefreshTokenGuard implements CanActivate {
     if (!user) throw new UnauthorizedException();
     request.user = user;
     request.refreshTokenDecoratorJwt = dataToken;
-
     return true;
   }
 }
