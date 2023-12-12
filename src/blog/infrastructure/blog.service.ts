@@ -39,7 +39,7 @@ export class BlogService {
       isMembership: false,
     };
     const result = await this.blogRepository.createBlog({ ...newBlog });
-    if (!result) throw new BadRequestException();
+    if (!result) throw new BadRequestException([]);
     return newBlog;
   }
 
