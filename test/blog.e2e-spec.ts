@@ -7,7 +7,10 @@ import { faker } from '@faker-js/faker';
 describe('blogs', () => {
   let app: INestApplication;
   let server;
-  const newBlog: any = null;
+  let newBlog: any = null;
+  // const newBlog1: any = null;
+  let newPost: any = null;
+  const newPost1: any = null;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,13 +42,51 @@ describe('blogs', () => {
         totalCount: 0,
         items: [],
       };
-      const response = await request(app.getHttpServer()).get('/blogs');
+      const response = await request(server).get('/blogs');
       expect(response.status).toBe(200);
       expect(response.body).toEqual(paginationBlog);
     });
   });
+  describe('GET blogs', () => {
+    // const blogsTotalCount = 100;
+    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server).get('/blogs');
+      expect(response.status).toBe(200);
+      expect(response.body.pagesCount).toBe(1);
+      expect(response.body.page).toBe(1);
+      expect(response.body.pageSize).toBe(10);
+      expect(response.body.totalCount).toBe(2);
+      expect(response.body.items).toHaveLength(2);
+    });
 
-  describe('create blogs', () => {
+    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 2, pageSize: 1', async () => {
+      const response = await request(server).get(
+        '/blogs?pageNumber=2&pageSize=1',
+      );
+      expect(response.status).toBe(200);
+      expect(response.body.pagesCount).toBe(2);
+      expect(response.body.page).toBe(2);
+      expect(response.body.pageSize).toBe(1);
+      expect(response.body.totalCount).toBe(2);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].id > response.body.items[1].id).toBe(true);
+    });
+
+    it('pagination: sortBy: id, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server).get(
+        '/blogs?pageNumber=1&pageSize=10&sortBy=id&sortDirection=asc',
+      );
+      expect(response.status).toBe(200);
+      expect(response.body.pagesCount).toBe(1);
+      expect(response.body.page).toBe(1);
+      expect(response.body.pageSize).toBe(10);
+      expect(response.body.totalCount).toBe(2);
+      expect(response.body.items).toHaveLength(2);
+      expect(response.body.items[0].id < response.body.items[1].id).toBe(true);
+    });
+  });
+
+  describe('POST blogs', () => {
     it('should delete all data, status 204', async () => {
       const response = await request(server).delete('/testing/all-data');
       expect(response.status).toBe(204);
@@ -63,9 +104,9 @@ describe('blogs', () => {
         .post('/blogs')
         .auth('admin', 'qwerty', { type: 'basic' })
         .send(blog);
-
       expect(response.status).toBe(201);
-      expect(response.body).toEqual({
+      newBlog = response.body;
+      expect(newBlog).toEqual({
         id: expect.any(String),
         name: blog.name,
         description: blog.description,
@@ -73,8 +114,6 @@ describe('blogs', () => {
         createdAt: expect.any(String),
         isMembership: false,
       });
-      expect(response.body).toBeDefined();
-      expect.setState(response.body);
     });
 
     it('incorrect data blogs, 400', async () => {
@@ -116,14 +155,15 @@ describe('blogs', () => {
       expect(response1.status).toBe(400);
       expect(response1.body).toStrictEqual(errors);
     });
-    // const response1 = await request(server).post('/blogs');
-    // expect(response1.status).toBe(401);
+
+    it('Unauthorized, 401', async () => {
+      const response = await request(server).post('/blogs');
+      expect(response.status).toBe(401);
+    });
   });
 
   describe('PUT => blogs', () => {
     it('update blog, 204', async () => {
-      const { blog } = expect.getState();
-
       const updateBlog = {
         name: faker.lorem.word({ length: 10 }),
         description: faker.lorem.paragraph(2),
@@ -134,20 +174,19 @@ describe('blogs', () => {
         .put(`/blogs/${newBlog?.id}`)
         .auth('admin', 'qwerty', { type: 'basic' })
         .send(updateBlog);
+
       expect(response.status).toBe(204);
 
       const getResponse = await request(server)
         .get(`/blogs/${newBlog?.id}`)
         .auth('admin', 'qwerty', { type: 'basic' });
-
       expect(getResponse.status).toBe(200);
 
       expect(getResponse.body).toEqual({
-        id: blog.id,
+        ...newBlog,
         name: updateBlog.name,
         description: updateBlog.description,
         websiteUrl: updateBlog.websiteUrl,
-        createdAt: blog.description,
       });
     });
 
@@ -246,10 +285,99 @@ describe('blogs', () => {
     });
   });
 
-  describe('GET => blogId', () => {
+  describe('GET => :id', () => {
     it('get blogId, 200', async () => {
       const response = await request(server).get(`/blogs/${newBlog?.id}`);
+      expect(response.status).toBe(200);
+    });
 
+    it(`don't exist blog, 404`, async () => {
+      const response = await request(server).get(`/blogs/12345`);
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('POST :blogId/posts', () => {
+    it('create post not existing blogId, 404', async () => {
+      const post = {
+        title: faker.lorem.word({ length: 10 }),
+        shortDescription: faker.lorem.word({ length: 10 }),
+        content: faker.lorem.word({ length: 10 }),
+      };
+
+      const response = await request(server)
+        .post('/blogs/1234/posts')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(post);
+      expect(response.status).toBe(404);
+    });
+
+    it('Unauthorized, 401', async () => {
+      const response = await request(server).post(
+        `/blogs/${newBlog?.id}/posts`,
+      );
+      expect(response.status).toBe(401);
+    });
+
+    it('incorrect data, 400', async () => {
+      const response = await request(server)
+        .post(`/blogs/${newBlog?.id}/posts`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send({
+          title: 'string',
+        });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        errorsMessages: expect.arrayContaining([
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+        ]),
+      });
+    });
+
+    it('create post existing blogId, 201', async () => {
+      const post = {
+        title: faker.lorem.word({ length: 10 }),
+        shortDescription: faker.lorem.word({ length: 10 }),
+        content: faker.lorem.word({ length: 10 }),
+      };
+
+      const response = await request(server)
+        .post(`/blogs/${newBlog?.id}/posts`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(post);
+
+      expect(response.status).toBe(201);
+      newPost = response.body;
+      const resultPost = await request(server).get(`/posts/${newPost?.id}`);
+      expect(response.body).toEqual(resultPost.body);
+    });
+  });
+
+  describe('GET :blogId/posts', () => {
+    it('If specificied blog is not exists', async () => {
+      const response = await request(server).get('/blogs/1234/posts');
+      expect(response.status).toBe(404);
+    });
+
+    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
+      // newPost1 = await createPost(newBlog!.id, {
+      //   title: 't1',
+      //   content: 'c1',
+      //   shortDescription: 'd1',
+      // });
+
+      const response = await request(server).get(`/blogs/${newBlog.id}/posts`);
+      expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
+      expect(response.status).toBe(200);
       expect(response.status).toBe(200);
     });
   });
