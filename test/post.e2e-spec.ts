@@ -2,10 +2,12 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
+import { TestingPost } from './helper/helper';
 
 describe('posts', () => {
   let app: INestApplication;
   let server;
+  let testingPost: TestingPost;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -27,4 +29,6 @@ describe('posts', () => {
     expect(response.status).toBe(204);
     expect(response.body).toEqual({});
   });
+
+  describe('', () => {});
 });

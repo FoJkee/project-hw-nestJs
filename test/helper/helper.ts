@@ -1,11 +1,13 @@
 import { CreateBlogDto } from '../../src/blog/dto/blog.dto';
 import request from 'supertest';
-import { fa, faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { CreatePostForBlogDto } from '../../src/post/dto/post.dto';
 import { BlogViewModels } from '../../src/blog/models/blog.view.models';
+import { isUUID } from 'class-validator';
 
 export class TestingBlog {
   constructor(private readonly server: any) {}
+
   async createBlog() {
     const blogData: CreateBlogDto = {
       name: faker.lorem.word({ length: 10 }),
@@ -16,6 +18,15 @@ export class TestingBlog {
       .post('/blogs')
       .auth('admin', 'qwerty', { type: 'basic' })
       .send(blogData);
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({
+      id: expect.any(String),
+      name: blogData.name,
+      description: blogData.description,
+      websiteUrl: blogData.websiteUrl,
+      createdAt: expect.any(String),
+      isMembership: false,
+    });
 
     return response.body;
   }
