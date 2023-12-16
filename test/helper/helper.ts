@@ -3,7 +3,6 @@ import request from 'supertest';
 import { faker } from '@faker-js/faker';
 import { CreatePostForBlogDto } from '../../src/post/dto/post.dto';
 import { BlogViewModels } from '../../src/blog/models/blog.view.models';
-import { isUUID } from 'class-validator';
 
 export class TestingBlog {
   constructor(private readonly server: any) {}
@@ -42,9 +41,11 @@ export class TestingPost {
       blogId: blog.id,
     };
     const response = await request(this.server)
-      .post('/blogs')
+      .post('/posts')
       .auth('admin', 'qwerty', { type: 'basic' })
       .send(postData);
+
+    expect(response.status).toBe(201);
 
     return response.body;
   }

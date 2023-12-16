@@ -1,34 +1,62 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
-import { TestingPost } from './helper/helper';
+import { TestingBlog, TestingPost } from './helper/helper';
+import { createApp } from '../src/config/create-app';
+import { BlogViewModels } from '../src/blog/models/blog.view.models';
+import { PostViewModels } from '../src/post/models/post.view.models';
 
 describe('posts', () => {
   let app: INestApplication;
   let server;
+  let testingBlog: TestingBlog;
   let testingPost: TestingPost;
+  let newBlog1: BlogViewModels;
+  let newPost: PostViewModels;
 
   beforeAll(async () => {
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = module.createNestApplication();
+    app = createApp(app);
     await app.init();
     server = app.getHttpServer();
+    testingBlog = new TestingBlog(server);
+    testingPost = new TestingPost(server);
+
+    app = module.createNestApplication();
+    app = createApp(app);
+    await app.init();
+    server = app.getHttpServer();
+    testingBlog = new TestingBlog(server);
+    testingPost = new TestingPost(server);
   });
 
   afterAll(async () => {
     await app.close();
     await server.close();
   });
-
-  it('delete all post', async () => {
-    const response = await request(server).delete('/testing/all-data');
-    expect(response.status).toBe(204);
-    expect(response.body).toEqual({});
+  describe('', () => {
+    it('delete all post', async () => {
+      const response = await request(server).delete('/testing/all-data');
+      expect(response.status).toBe(204);
+      expect(response.body).toEqual({});
+    });
   });
 
-  describe('', () => {});
+  describe('POST', () => {
+    it('create blog correct data', async () => {
+      newBlog1 = await testingBlog.createBlog();
+      const response = await request(server).get('/blogs');
+      expect(response.body.items).toEqual([newBlog1]);
+    });
+    it('create post correct data', async () => {
+      newPost = await testingPost.createPost(newBlog1);
+      const response = await request(server).get('/posts');
+      expect(response.body.items).toEqual([newPost]);
+    });
+  });
 });

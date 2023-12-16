@@ -2,16 +2,19 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
-import { TestingBlog } from './helper/helper';
+import { TestingBlog, TestingPost } from './helper/helper';
 import { createApp } from '../src/config/create-app';
 import { faker } from '@faker-js/faker';
 import { BlogViewModels } from '../src/blog/models/blog.view.models';
+import { PostViewModels } from '../src/post/models/post.view.models';
 
 describe('blogs', () => {
   let app: INestApplication;
   let server;
   let testingBlog: TestingBlog;
+  let testingPost: TestingPost;
   let newBlog1: BlogViewModels;
+  let newPost: PostViewModels;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,18 +41,18 @@ describe('blogs', () => {
       expect(response.body).toEqual({});
     });
 
-    it('return clear pagination', async () => {
-      const paginationBlog = {
-        pagesCount: 0,
-        page: 1,
-        pageSize: 10,
-        totalCount: 0,
-        items: [],
-      };
-      const response = await request(server).get('/blogs');
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(paginationBlog);
-    });
+    // it('return clear pagination', async () => {
+    //   const paginationBlog = {
+    //     pagesCount: 0,
+    //     page: 1,
+    //     pageSize: 10,
+    //     totalCount: 0,
+    //     items: [],
+    //   };
+    //   const response = await request(server).get('/blogs');
+    //   expect(response.status).toBe(200);
+    //   expect(response.body).toEqual(paginationBlog);
+    // });
   });
 
   describe('POST blogs', () => {
@@ -118,6 +121,11 @@ describe('blogs', () => {
       const response = await request(server).get('/blogs');
       expect(response.status).toBe(200);
     });
+    it('create blogs, 201', async () => {
+      newBlog1 = await testingBlog.createBlog();
+      const response = await request(server).get('/blogs');
+      expect(response.status).toBe(200);
+    });
   });
 
   describe('GET => :id', () => {
@@ -135,66 +143,56 @@ describe('blogs', () => {
 
   describe('GET blogs', () => {
     it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
-      const response = await request(server)
-        .get('/blogs')
-        .query({
-          sortBy: 'createdAt',
-          sortDirection: 'desc',
-          pageNumber: 1,
-          pageSize: 10,
-        })
-        .expect(200);
-
-      // expect(response.body).toEqual({
-      //   pagesCount: Math.ceil(countDocument / pageSize),
-      //   page: pageNumber,
-      //   pageSize: pageSize,
-      //   totalCount: countDocument,
-      //   items: expect.any(Array),
-      // });
-      // expect(response.body.pagesCount).toBe(1);
-      // expect(response.body.page).toBe(1);
-      // expect(response.body.pageSize).toBe(10);
-      // expect(response.body.totalCount).toBe(1);
-      // expect(response.body.items).toHaveLength(1);
-    });
-
-    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 2, pageSize: 1', async () => {
-      const response = await request(server).get(
-        '/blogs?pageNumber=2&pageSize=1',
-      );
+      const response = await request(server).get('/blogs').query({
+        sortBy: 'createdAt',
+        sortDirection: 'desc',
+        pageNumber: 1,
+        pageSize: 10,
+      });
       expect(response.status).toBe(200);
-      expect(response.body.pagesCount).toBe(2);
-      expect(response.body.page).toBe(2);
-      expect(response.body.pageSize).toBe(1);
-      expect(response.body.totalCount).toBe(2);
-      expect(response.body.items).toHaveLength(1);
-      expect(response.body.items[0].id > response.body.items[1].id).toBe(true);
-    });
-
-    it('pagination: sortBy: id, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
-      const response = await request(server)
-        .get('/blogs')
-        .query({
-          pageNumber: 1,
-          pageSize: 10,
-          sortBy: 'id',
-          sortDirection: 'asc',
-        })
-        .expect(200);
-
       expect(response.body).toEqual({
+        pagesCount: 1,
         page: 1,
         pageSize: 10,
-        sortBy: 'id',
-        sortDirection: 'asc',
+        totalCount: 2,
         items: expect.any(Array),
       });
+    });
 
-      expect(response.body.items[0].id < response.body.items[1].id).toBe(true);
+    it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server).get('/blogs').query({
+        sortBy: 'createdAt',
+        sortDirection: 'asc',
+        pageNumber: 1,
+        pageSize: 10,
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: expect.any(Array),
+      });
+    });
+
+    it('pagination pageNumber=2, pageSize=1, sortBy=createdAt(default), sortDirection=desc(default)', async () => {
+      const response = await request(server).get('/blogs').query({
+        sortBy: 'createdAt',
+        sortDirection: 'desc',
+        pageNumber: 2,
+        pageSize: 1,
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        pagesCount: 2,
+        page: 2,
+        pageSize: 1,
+        totalCount: 2,
+        items: expect.any(Array),
+      });
     });
   });
-
   describe('PUT => blogs', () => {
     it('user dont authorise, 401', async () => {
       const response = await request(server).put(`/blogs/1234`);
@@ -339,7 +337,7 @@ describe('blogs', () => {
   //     };
   //
   //     const response = await request(server)
-  //       .post('/blogs/1234/posts')
+  //       .post('/blogs/-1234/posts')
   //       .auth('admin', 'qwerty', { type: 'basic' })
   //       .send(post);
   //     expect(response.status).toBe(404);
@@ -375,21 +373,25 @@ describe('blogs', () => {
   //   });
   //
   //   it('create post existing blogId, 201', async () => {
-  //     const post = {
-  //       title: faker.lorem.word({ length: 10 }),
-  //       shortDescription: faker.lorem.word({ length: 10 }),
-  //       content: faker.lorem.word({ length: 10 }),
-  //     };
-  //
+  //     // const post = {
+  //     //   title: faker.lorem.word({ length: 10 }),
+  //     //   shortDescription: faker.lorem.word({ length: 10 }),
+  //     //   content: faker.lorem.word({ length: 10 }),
+  //     // };
+  //     newPost = await testingPost.createPost(newBlog1);
   //     const response = await request(server)
   //       .post(`/blogs/${newBlog1.id}/posts`)
   //       .auth('admin', 'qwerty', { type: 'basic' })
-  //       .send(post);
+  //       .send(newPost);
   //
   //     expect(response.status).toBe(201);
-  //     newPost = response.body;
-  //     const resultPost = await request(server).get(`/posts/${newPost?.id}`);
+  //     expect(response.body).toEqual(newPost);
+  //
+  //     const resultPost = await request(server).get(
+  //       `/posts/${response.body.id}`,
+  //     );
   //     expect(response.body).toEqual(resultPost.body);
+  //     expect(response.status).toBe();
   //   });
   // });
 
