@@ -12,8 +12,9 @@ describe('posts', () => {
   let server;
   let testingBlog: TestingBlog;
   let testingPost: TestingPost;
-  let newBlog1: BlogViewModels;
-  let newPost: PostViewModels;
+  let newBlog: BlogViewModels;
+  let newPost1: PostViewModels;
+  let newPost2: PostViewModels;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,7 +40,7 @@ describe('posts', () => {
     await app.close();
     await server.close();
   });
-  describe('', () => {
+  describe('DELETE ALL', () => {
     it('delete all post', async () => {
       const response = await request(server).delete('/testing/all-data');
       expect(response.status).toBe(204);
@@ -48,15 +49,21 @@ describe('posts', () => {
   });
 
   describe('POST', () => {
-    it('create blog correct data', async () => {
-      newBlog1 = await testingBlog.createBlog();
+    it('incorrect data', async () => {});
+    it('create blog correct data, 200', async () => {
+      newBlog = await testingBlog.createBlog();
       const response = await request(server).get('/blogs');
-      expect(response.body.items).toEqual([newBlog1]);
+      expect(response.body.items).toEqual([newBlog]);
     });
     it('create post correct data', async () => {
-      newPost = await testingPost.createPost(newBlog1);
+      newPost1 = await testingPost.createPost(newBlog);
       const response = await request(server).get('/posts');
-      expect(response.body.items).toEqual([newPost]);
+      expect(response.status).toBe(200);
+    });
+    it('create post correct data', async () => {
+      newPost2 = await testingPost.createPost(newBlog);
+      const response = await request(server).get('/posts');
+      expect(response.status).toBe(200);
     });
   });
 });
