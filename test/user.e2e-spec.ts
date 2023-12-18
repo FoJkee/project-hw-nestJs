@@ -114,5 +114,24 @@ describe('user', () => {
         items: expect.any(Array),
       });
     });
+    it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server)
+        .get('/users')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .query({
+          sortBy: 'createdAt',
+          sortDirection: 'asc',
+          pageNumber: 1,
+          pageSize: 10,
+        });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: expect.any(Array),
+      });
+    });
   });
 });
