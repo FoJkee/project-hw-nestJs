@@ -270,6 +270,7 @@ describe('blogs', () => {
 
       expect(response.status).toBe(404);
     });
+
     it('update blog, 204', async () => {
       const updateBlog = {
         name: faker.lorem.word({ length: 15 }),

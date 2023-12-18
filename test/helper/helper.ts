@@ -50,3 +50,30 @@ export class TestingPost {
     return response.body;
   }
 }
+
+export class TestingUser {
+  constructor(private readonly server: any) {}
+
+  async createUser() {
+    const userData = {
+      login: faker.lorem.word({ length: 10 }),
+      email: faker.internet.email(),
+      password: faker.lorem.word({ length: 10 }),
+    };
+
+    const response = await request(this.server)
+      .post('/users')
+      .auth('admin', 'qwerty', { type: 'basic' })
+      .send(userData);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({
+      id: expect.any(String),
+      login: userData.login,
+      email: userData.email,
+      createdAt: expect.any(String),
+    });
+
+    return response.body;
+  }
+}

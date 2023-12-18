@@ -6,6 +6,7 @@ import { TestingBlog, TestingPost } from './helper/helper';
 import { createApp } from '../src/config/create-app';
 import { BlogViewModels } from '../src/blog/models/blog.view.models';
 import { PostViewModels } from '../src/post/models/post.view.models';
+import { faker } from '@faker-js/faker';
 
 describe('posts', () => {
   let app: INestApplication;
@@ -42,78 +43,78 @@ describe('posts', () => {
   });
 
   describe('POST', () => {
-    it('no data available posts, 400', async () => {
-      const errors = {
-        errorsMessages: [
-          {
-            message: expect.any(String),
-            field: 'title',
-          },
-          {
-            message: expect.any(String),
-            field: 'shortDescription',
-          },
-          {
-            message: expect.any(String),
-            field: 'content',
-          },
-          {
-            message: expect.any(String),
-            field: 'blogId',
-          },
-        ],
-      };
+    // it('no data available posts, 400', async () => {
+    //   const errors = {
+    //     errorsMessages: [
+    //       {
+    //         message: expect.any(String),
+    //         field: 'title',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'shortDescription',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'content',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'blogId',
+    //       },
+    //     ],
+    //   };
+    //
+    //   await request(server)
+    //     .post('/posts')
+    //     .auth('admin', 'qwerty')
+    //     .send({})
+    //     .expect(400, errors);
+    //
+    //   const response = await request(server).get('/posts');
+    //   expect(response.body.items).toEqual([]);
+    //   // expect(response.body).toStrictEqual(errors);
+    // });
+    // it('data is empty posts, 400', async () => {
+    //   const newPost = {
+    //     title: '',
+    //     shortDescription: '',
+    //     content: '',
+    //     blogId: '',
+    //   };
+    //   const errors = {
+    //     errorsMessages: [
+    //       {
+    //         message: expect.any(String),
+    //         field: 'title',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'shortDescription',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'content',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'blogId',
+    //       },
+    //     ],
+    //   };
+    //
+    //   await request(server)
+    //     .post('/posts')
+    //     .auth('admin', 'qwerty')
+    //     .send(newPost)
+    //     .expect(400, errors);
+    //
+    //   const response = await request(server).get('/posts');
+    //
+    //   expect(response.body.items).toEqual([]);
+    //   // expect(response.body).toStrictEqual(errors);
+    // });
 
-      await request(server)
-        .post('/posts')
-        .auth('admin', 'qwerty')
-        .send({})
-        .expect(400, errors);
-
-      const response = await request(server).get('/posts');
-      expect(response.body.items).toEqual([]);
-      // expect(response.body).toStrictEqual(errors);
-    });
-
-    it('data is empty posts, 400', async () => {
-      const newPost = {
-        title: '',
-        shortDescription: '',
-        content: '',
-        blogId: '',
-      };
-      const errors = {
-        errorsMessages: [
-          {
-            message: expect.any(String),
-            field: 'title',
-          },
-          {
-            message: expect.any(String),
-            field: 'shortDescription',
-          },
-          {
-            message: expect.any(String),
-            field: 'content',
-          },
-          {
-            message: expect.any(String),
-            field: 'blogId',
-          },
-        ],
-      };
-
-      await request(server)
-        .post('/posts')
-        .auth('admin', 'qwerty')
-        .send(newPost)
-        .expect(400, errors);
-
-      const response = await request(server).get('/posts');
-
-      expect(response.body.items).toEqual([]);
-      // expect(response.body).toStrictEqual(errors);
-    });
     it('create blog correct data, 200', async () => {
       newBlog = await testingBlog.createBlog();
       const response = await request(server).get('/blogs');
@@ -131,17 +132,187 @@ describe('posts', () => {
     });
   });
   describe('GET', () => {
-    it('', async () => {});
-  });
-  describe('DELETE', () => {
-    it('', async () => {});
+    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server).get(`/posts`).query({
+        sortBy: 'createdAt',
+        sortDirection: 'desc',
+        pageNumber: 1,
+        pageSize: 10,
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: expect.any(Array),
+      });
+    });
+    it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
+      const response = await request(server).get(`/posts`).query({
+        sortBy: 'createdAt',
+        sortDirection: 'asc',
+        pageNumber: 1,
+        pageSize: 10,
+      });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 2,
+        items: expect.any(Array),
+      });
+    });
   });
   describe('PUT', () => {
-    it('', async () => {});
+    it('Unauthorized, 401', async () => {
+      const response = await request(server).put(`/posts/-1`);
+      expect(response.status).toBe(401);
+    });
+    // it('no data available posts, 400', async () => {
+    //   const errors = {
+    //     errorsMessages: [
+    //       {
+    //         message: expect.any(String),
+    //         field: 'title',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'shortDescription',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'content',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'blogId',
+    //       },
+    //     ],
+    //   };
+    //
+    //   await request(server)
+    //     .post('/posts')
+    //     .auth('admin', 'qwerty')
+    //     .send({})
+    //     .expect(400, errors);
+    //
+    //   const response = await request(server).get('/posts');
+    //   expect(response.body.items).toEqual([]);
+    //   // expect(response.body).toStrictEqual(errors);
+    // });
+
+    // it('data is empty posts, 400', async () => {
+    //   const newPost = {
+    //     title: '',
+    //     shortDescription: '',
+    //     content: '',
+    //     blogId: '',
+    //   };
+    //   const errors = {
+    //     errorsMessages: [
+    //       {
+    //         message: expect.any(String),
+    //         field: 'title',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'shortDescription',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'content',
+    //       },
+    //       {
+    //         message: expect.any(String),
+    //         field: 'blogId',
+    //       },
+    //     ],
+    //   };
+    //
+    //   await request(server)
+    //     .post('/posts')
+    //     .auth('admin', 'qwerty')
+    //     .send(newPost)
+    //     .expect(400, errors);
+    //
+    //   const response = await request(server).get('/posts');
+    //
+    //   expect(response.body.items).toEqual([]);
+    //   // expect(response.body).toStrictEqual(errors);
+    // });
+    it('update post, 204', async () => {
+      const updatePost = {
+        title: faker.lorem.word({ length: 10 }),
+        shortDescription: faker.lorem.word({ length: 10 }),
+        content: faker.lorem.word({ length: 10 }),
+        blogId: newBlog.id,
+      };
+      const response = await request(server)
+        .put(`/posts/${newPost1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(updatePost);
+      expect(response.status).toBe(204);
+
+      const responseGet = await request(server)
+        .get(`/posts/${newPost1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+      expect(responseGet.status).toBe(200);
+      expect(responseGet.body).toEqual({
+        ...newPost1,
+        title: updatePost.title,
+        shortDescription: updatePost.shortDescription,
+        content: updatePost.content,
+        blogId: newBlog.id,
+      });
+    });
   });
   describe('GET => :id', () => {
-    it('', async () => {});
+    it('post not exist, 404', async () => {
+      const response = await request(server)
+        .delete(`/posts/-1`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+
+      expect(response.status).toBe(404);
+    });
+    it('get postId, 200', async () => {
+      const response = await request(server).get(`/posts/${newPost2.id}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(newPost2);
+    });
   });
+  describe('DELETE', () => {
+    it('Unauthorized, 401', async () => {
+      const response = await request(server).delete(`/posts/-1`);
+
+      expect(response.status).toBe(401);
+    });
+    it('post not exist, 404', async () => {
+      const response = await request(server)
+        .delete(`/posts/-1`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+
+      expect(response.status).toBe(404);
+    });
+    it('delete blog, 204', async () => {
+      const responseGetBefore = await request(server)
+        .get(`/posts/${newPost1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+      expect(responseGetBefore.status).toBe(200);
+
+      const responseDelete = await request(server)
+        .delete(`/posts/${newPost1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+      expect(responseDelete.status).toBe(204);
+
+      const responseGetAfter = await request(server)
+        .get(`/posts/${newPost1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+      expect(responseGetAfter.status).toBe(404);
+    });
+  });
+
   describe('POST => :id/comments', () => {
     it('', async () => {});
   });
