@@ -27,7 +27,7 @@ export class UserQueryRepository {
       : '';
 
     const filter: any = {
-      $or: [
+      $and: [
         { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
 
         { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },

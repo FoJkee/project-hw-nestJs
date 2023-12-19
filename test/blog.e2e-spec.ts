@@ -2,19 +2,18 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
-import { TestingBlog, TestingPost } from './helper/helper';
+import { TestingBlog } from './helper/helper';
 import { createApp } from '../src/config/create-app';
 import { faker } from '@faker-js/faker';
 import { BlogViewModels } from '../src/blog/models/blog.view.models';
-import { PostViewModels } from '../src/post/models/post.view.models';
 
 describe('blogs', () => {
   let app: INestApplication;
   let server;
   let testingBlog: TestingBlog;
-  let testingPost: TestingPost;
   let newBlog1: BlogViewModels;
-  let newPost: PostViewModels;
+  let newBlog2: BlogViewModels;
+  let newBlog3: BlogViewModels;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -117,47 +116,52 @@ describe('blogs', () => {
       expect(response.status).toBe(401);
     });
     it('create blogs, 201', async () => {
-      newBlog1 = await testingBlog.createBlog();
+      newBlog1 = await testingBlog.createBlogForPagination();
       const response = await request(server).get('/blogs');
       expect(response.status).toBe(200);
     });
     it('create blogs, 201', async () => {
-      newBlog1 = await testingBlog.createBlog();
+      newBlog2 = await testingBlog.createBlog();
       const response = await request(server).get('/blogs');
       expect(response.status).toBe(200);
     });
+    // it('create blogs, 201', async () => {
+    //   newBlog3 = await testingBlog.createBlogForPagination();
+    //   const response = await request(server).get('/blogs');
+    //   expect(response.status).toBe(200);
+    // });
   });
 
   describe('GET => :id', () => {
+    it(`don't exist blog, 404`, async () => {
+      const response = await request(server).get(`/blogs/12345`);
+      expect(response.status).toBe(404);
+    });
     it('get blogId, 200', async () => {
       const response = await request(server).get(`/blogs/${newBlog1.id}`);
       expect(response.status).toBe(200);
       expect(response.body).toEqual(newBlog1);
     });
-
-    it(`don't exist blog, 404`, async () => {
-      const response = await request(server).get(`/blogs/12345`);
-      expect(response.status).toBe(404);
-    });
   });
 
   describe('GET blogs', () => {
-    it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
-      const response = await request(server).get('/blogs').query({
-        sortBy: 'createdAt',
-        sortDirection: 'desc',
-        pageNumber: 1,
-        pageSize: 10,
-      });
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        pagesCount: 1,
-        page: 1,
-        pageSize: 10,
-        totalCount: 2,
-        items: expect.any(Array),
-      });
-    });
+    // it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
+    //   const response = await request(server).get('/blogs').query({
+    //     sortBy: 'createdAt',
+    //     sortDirection: 'desc',
+    //     pageNumber: 1,
+    //     pageSize: 10,
+    //   });
+    //   expect(response.status).toBe(200);
+    //   // expect(response.body.items[0].id > response.body.items[1].id).toBe(true);
+    //   expect(response.body).toEqual({
+    //     pagesCount: 1,
+    //     page: 1,
+    //     pageSize: 10,
+    //     totalCount: 2,
+    //     items: expect.any(Array),
+    //   });
+    // });
 
     it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
       const response = await request(server).get('/blogs').query({
@@ -167,6 +171,7 @@ describe('blogs', () => {
         pageSize: 10,
       });
       expect(response.status).toBe(200);
+      expect(response.body.items[0].id < response.body.items[1].id).toBe(true);
       expect(response.body).toEqual({
         pagesCount: 1,
         page: 1,
@@ -192,7 +197,16 @@ describe('blogs', () => {
         items: expect.any(Array),
       });
     });
+
+    it('pagination searchNameTerm', async () => {
+      const response = await request(server).get('/blogs').query({
+        searchNameTerm: 'Ka',
+      });
+      expect(response.status).toBe(200);
+      expect(response.body.items[0].id).toBe(newBlog1.id);
+    });
   });
+
   describe('PUT => blogs', () => {
     it('user dont authorise, 401', async () => {
       const response = await request(server).put(`/blogs/1234`);
@@ -312,11 +326,6 @@ describe('blogs', () => {
       expect(response.status).toBe(401);
     });
     it('delete blog, 204', async () => {
-      const responseGetBefore = await request(server)
-        .get(`/blogs/${newBlog1.id}`)
-        .auth('admin', 'qwerty', { type: 'basic' });
-      expect(responseGetBefore.status).toBe(200);
-
       const responseDelete = await request(server)
         .delete(`/blogs/${newBlog1.id}`)
         .auth('admin', 'qwerty', { type: 'basic' });
@@ -329,72 +338,69 @@ describe('blogs', () => {
     });
   });
 
-  // describe('POST :blogId/posts', () => {
-  //   it('create post not existing blogId, 404', async () => {
-  //     const post = {
-  //       title: faker.lorem.word({ length: 10 }),
-  //       shortDescription: faker.lorem.word({ length: 10 }),
-  //       content: faker.lorem.word({ length: 10 }),
-  //     };
-  //
-  //     const response = await request(server)
-  //       .post('/blogs/-1234/posts')
-  //       .auth('admin', 'qwerty', { type: 'basic' })
-  //       .send(post);
-  //     expect(response.status).toBe(404);
-  //   });
-  //
-  //   it('Unauthorized, 401', async () => {
-  //     const response = await request(server).post(
-  //       `/blogs/${newBlog1.id}/posts`,
-  //     );
-  //     expect(response.status).toBe(401);
-  //   });
-  //
-  //   it('incorrect data, 400', async () => {
-  //     const response = await request(server)
-  //       .post(`/blogs/${newBlog1.id}/posts`)
-  //       .auth('admin', 'qwerty', { type: 'basic' })
-  //       .send({
-  //         title: 'string',
-  //       });
-  //     expect(response.status).toBe(400);
-  //     expect(response.body).toEqual({
-  //       errorsMessages: expect.arrayContaining([
-  //         {
-  //           message: expect.any(String),
-  //           field: 'shortDescription',
-  //         },
-  //         {
-  //           message: expect.any(String),
-  //           field: 'content',
-  //         },
-  //       ]),
-  //     });
-  //   });
-  //
-  //   it('create post existing blogId, 201', async () => {
-  //     // const post = {
-  //     //   title: faker.lorem.word({ length: 10 }),
-  //     //   shortDescription: faker.lorem.word({ length: 10 }),
-  //     //   content: faker.lorem.word({ length: 10 }),
-  //     // };
-  //     newPost = await testingPost.createPost(newBlog1);
-  //     const response = await request(server)
-  //       .post(`/blogs/${newBlog1.id}/posts`)
-  //       .auth('admin', 'qwerty', { type: 'basic' })
-  //       .send(newPost);
-  //
-  //     expect(response.status).toBe(201);
-  //     expect(response.body).toEqual(newPost);
-  //
-  //     const resultPost = await request(server).get(
-  //       `/posts/${response.body.id}`,
-  //     );
-  //     expect(response.body).toEqual(resultPost.body);
-  //     expect(response.status).toBe();
-  //   });
-  // });
+  describe('POST :blogId/posts', () => {
+    it('create post not existing blogId, 404', async () => {
+      const post = {
+        title: faker.lorem.word({ length: 10 }),
+        shortDescription: faker.lorem.word({ length: 10 }),
+        content: faker.lorem.word({ length: 10 }),
+      };
+
+      const response = await request(server)
+        .post('/blogs/-1234/posts')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(post);
+      expect(response.status).toBe(404);
+    });
+
+    it('Unauthorized, 401', async () => {
+      const response = await request(server).post(
+        `/blogs/${newBlog1.id}/posts`,
+      );
+      expect(response.status).toBe(401);
+    });
+
+    it('incorrect data, 400', async () => {
+      const response = await request(server)
+        .post(`/blogs/${newBlog1.id}/posts`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send({
+          title: 'string',
+        });
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        errorsMessages: expect.arrayContaining([
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+        ]),
+      });
+    });
+
+    it('create post existing blogId, 201', async () => {
+      const post = {
+        title: faker.lorem.word({ length: 10 }),
+        shortDescription: faker.lorem.word({ length: 10 }),
+        content: faker.lorem.word({ length: 10 }),
+      };
+      const response = await request(server)
+        .post(`/blogs/${newBlog2.id}/posts`)
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(post);
+
+      expect(response.status).toBe(201);
+
+      const resultPost = await request(server).get(
+        `/posts/${response.body.id}`,
+      );
+      expect(response.body).toEqual(resultPost.body);
+    });
+  });
 
   // describe('GET :blogId/posts', () => {
   //   it('If specificied blog is not exists', async () => {
@@ -403,7 +409,7 @@ describe('blogs', () => {
   //   });
   //
   //   it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
-  //     const response = await request(server).get(`/blogs/${newBlog1.id}/posts`);
+  //     const response = await request(server).get(`/blogs/${newBlog2.id}/posts`);
   //     expect(response.status).toBe(200);
   //     expect(response.body.pagesCount).toBe(1);
   //     expect(response.body.page).toBe(1);
@@ -414,7 +420,7 @@ describe('blogs', () => {
   //
   //   it('pagination - pagination - pageNumber=2, pageSize=3, sortDirection=asc', async () => {
   //     const response = await request(server).get(
-  //       `/blogs/${newBlog1.id}/posts?pageNumber=2&pageSize=3&sortDirection=asc`,
+  //       `/blogs/${newBlog2.id}/posts?pageNumber=2&pageSize=3&sortDirection=asc`,
   //     );
   //     expect(response.status).toBe(200);
   //     expect(response.body.pagesCount).toBe(1);

@@ -1,5 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { createApp } from '../src/config/create-app';
@@ -13,6 +12,7 @@ describe('user', () => {
   let testingUser: TestingUser;
   let newUser1: UserViewModels;
   let newUser2: UserViewModels;
+  let newUser3: UserViewModels;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -38,40 +38,66 @@ describe('user', () => {
       expect(response.body).toEqual({});
     });
   });
-
   describe('POST', () => {
     it('Unauthorized user, 401', async () => {
       const response = await request(server).post('/users').send({});
       expect(response.status).toBe(401);
     });
-    // it('no data available user, 400', async () => {
-    //   const errorUser = {
-    //     errorsMessages: [
-    //       {
-    //         message: expect.any(String),
-    //         field: 'login',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'email',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'password',
-    //       },
-    //     ],
-    //   };
-    //   await request(server)
-    //     .post('/users')
-    //     .auth('admin', 'qwerty', { type: 'basic' })
-    //     .send({})
-    //     .expect(400, errorUser);
-    //
-    //   const response = await request(server)
-    //     .get(`/users`)
-    //     .auth('admin', 'qwerty', { type: 'basic' });
-    //   expect(response.body.items).toHaveLength(0);
-    // });
+    it('no data available user, 400', async () => {
+      const errorUser = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'login',
+          },
+          {
+            message: expect.any(String),
+            field: 'password',
+          },
+          {
+            message: expect.any(String),
+            field: 'email',
+          },
+        ],
+      };
+      const response = await request(server)
+        .post('/users')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errorUser);
+    });
+    it('data is empty user, 400', async () => {
+      const user = {
+        login: '',
+        password: '',
+        email: '',
+      };
+      const errorUser = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'login',
+          },
+          {
+            message: expect.any(String),
+            field: 'password',
+          },
+          {
+            message: expect.any(String),
+            field: 'email',
+          },
+        ],
+      };
+      const response = await request(server)
+        .post('/users')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .send(user);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errorUser);
+    });
 
     it('correct data user, 201', async () => {
       newUser1 = await testingUser.createUser();
@@ -89,8 +115,16 @@ describe('user', () => {
 
       expect(response.status).toBe(200);
     });
+    it('correct data user pagination, 201', async () => {
+      newUser3 = await testingUser.createUserForPagination();
+      const response = await request(server)
+        .get('/users')
+        .auth('admin', 'qwerty', { type: 'basic' });
+
+      expect(response.status).toBe(200);
+    });
   });
-  describe('GET', () => {
+  describe('GET => :id', () => {
     it('Unauthorized user, 401', async () => {
       const response = await request(server).get('/users');
       expect(response.status).toBe(401);
@@ -110,7 +144,7 @@ describe('user', () => {
         pagesCount: 1,
         page: 1,
         pageSize: 10,
-        totalCount: 2,
+        totalCount: 3,
         items: expect.any(Array),
       });
     });
@@ -129,9 +163,45 @@ describe('user', () => {
         pagesCount: 1,
         page: 1,
         pageSize: 10,
-        totalCount: 2,
+        totalCount: 3,
         items: expect.any(Array),
       });
+    });
+
+    it('pagination searchLoginTerm', async () => {
+      const response = await request(server)
+        .get('/users')
+        .auth('admin', 'qwerty', { type: 'basic' })
+        .query({
+          searchLoginTerm: 'A',
+        });
+      expect(response.status).toBe(200);
+      expect(response.body.items[0].id).toBe(newUser3.id);
+    });
+  });
+  describe('DELETE => :id', () => {
+    it('Unauthorized user, 401', async () => {
+      const response = await request(server).get('/users');
+      expect(response.status).toBe(401);
+    });
+    it('not found, 404', async () => {
+      const response = await request(server)
+        .get('/users/-12345')
+        .auth('admin', 'qwerty', { type: 'basic' });
+
+      expect(response.status).toBe(404);
+    });
+    it('delete user, 204', async () => {
+      const response = await request(server)
+        .delete(`/users/${newUser1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+      expect(response.status).toBe(204);
+
+      const responseAfter = await request(server)
+        .get(`/users/${newUser1.id}`)
+        .auth('admin', 'qwerty', { type: 'basic' });
+
+      expect(responseAfter.status).toBe(404);
     });
   });
 });

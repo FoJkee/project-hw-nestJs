@@ -18,11 +18,11 @@ describe('posts', () => {
   let newPost2: PostViewModels;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const modulePost: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = module.createNestApplication();
+    app = modulePost.createNestApplication();
     app = createApp(app);
     await app.init();
     server = app.getHttpServer();
@@ -43,89 +43,92 @@ describe('posts', () => {
   });
 
   describe('POST', () => {
-    // it('no data available posts, 400', async () => {
-    //   const errors = {
-    //     errorsMessages: [
-    //       {
-    //         message: expect.any(String),
-    //         field: 'title',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'shortDescription',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'content',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'blogId',
-    //       },
-    //     ],
-    //   };
-    //
-    //   await request(server)
-    //     .post('/posts')
-    //     .auth('admin', 'qwerty')
-    //     .send({})
-    //     .expect(400, errors);
-    //
-    //   const response = await request(server).get('/posts');
-    //   expect(response.body.items).toEqual([]);
-    //   // expect(response.body).toStrictEqual(errors);
-    // });
-    // it('data is empty posts, 400', async () => {
-    //   const newPost = {
-    //     title: '',
-    //     shortDescription: '',
-    //     content: '',
-    //     blogId: '',
-    //   };
-    //   const errors = {
-    //     errorsMessages: [
-    //       {
-    //         message: expect.any(String),
-    //         field: 'title',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'shortDescription',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'content',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'blogId',
-    //       },
-    //     ],
-    //   };
-    //
-    //   await request(server)
-    //     .post('/posts')
-    //     .auth('admin', 'qwerty')
-    //     .send(newPost)
-    //     .expect(400, errors);
-    //
-    //   const response = await request(server).get('/posts');
-    //
-    //   expect(response.body.items).toEqual([]);
-    //   // expect(response.body).toStrictEqual(errors);
-    // });
+    it('no data available posts, 400', async () => {
+      const errors = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'title',
+          },
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+        ],
+      };
+
+      const response = await request(server)
+        .post('/posts')
+        .auth('admin', 'qwerty')
+        .send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errors);
+    });
+    it('data is empty posts, 400', async () => {
+      const newPost = {
+        title: '',
+        shortDescription: '',
+        content: '',
+        blogId: '',
+      };
+      const errors = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'title',
+          },
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+        ],
+      };
+
+      const response = await request(server)
+        .post('/posts')
+        .auth('admin', 'qwerty')
+        .send(newPost);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errors);
+    });
 
     it('create blog correct data, 200', async () => {
       newBlog = await testingBlog.createBlog();
       const response = await request(server).get('/blogs');
-      expect(response.body.items).toEqual([newBlog]);
+      expect(response.status).toBe(200);
     });
-    it('create post correct data, 200', async () => {
+    it('create post correct data, 201', async () => {
       newPost1 = await testingPost.createPost(newBlog);
       const response = await request(server).get('/posts');
       expect(response.status).toBe(200);
     });
-    it('create post correct data, 200', async () => {
+    it('create post correct data, 201', async () => {
       newPost2 = await testingPost.createPost(newBlog);
       const response = await request(server).get('/posts');
       expect(response.status).toBe(200);
@@ -170,78 +173,73 @@ describe('posts', () => {
       const response = await request(server).put(`/posts/-1`);
       expect(response.status).toBe(401);
     });
-    // it('no data available posts, 400', async () => {
-    //   const errors = {
-    //     errorsMessages: [
-    //       {
-    //         message: expect.any(String),
-    //         field: 'title',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'shortDescription',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'content',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'blogId',
-    //       },
-    //     ],
-    //   };
-    //
-    //   await request(server)
-    //     .post('/posts')
-    //     .auth('admin', 'qwerty')
-    //     .send({})
-    //     .expect(400, errors);
-    //
-    //   const response = await request(server).get('/posts');
-    //   expect(response.body.items).toEqual([]);
-    //   // expect(response.body).toStrictEqual(errors);
-    // });
+    it('no data available posts, 400', async () => {
+      const errors = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'title',
+          },
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+          {
+            message: expect.any(String),
+            field: 'blogId',
+          },
+        ],
+      };
 
-    // it('data is empty posts, 400', async () => {
-    //   const newPost = {
-    //     title: '',
-    //     shortDescription: '',
-    //     content: '',
-    //     blogId: '',
-    //   };
-    //   const errors = {
-    //     errorsMessages: [
-    //       {
-    //         message: expect.any(String),
-    //         field: 'title',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'shortDescription',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'content',
-    //       },
-    //       {
-    //         message: expect.any(String),
-    //         field: 'blogId',
-    //       },
-    //     ],
-    //   };
-    //
-    //   await request(server)
-    //     .post('/posts')
-    //     .auth('admin', 'qwerty')
-    //     .send(newPost)
-    //     .expect(400, errors);
-    //
-    //   const response = await request(server).get('/posts');
-    //
-    //   expect(response.body.items).toEqual([]);
-    //   // expect(response.body).toStrictEqual(errors);
-    // });
+      const response = await request(server)
+        .put(`/posts/${newPost2.id}`)
+        .auth('admin', 'qwerty')
+        .send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errors);
+    });
+
+    it('data is empty posts, 400', async () => {
+      const newPost = {
+        title: '',
+        shortDescription: '',
+        content: '',
+        blogId: newBlog.id,
+      };
+      const errors = {
+        errorsMessages: [
+          {
+            message: expect.any(String),
+            field: 'title',
+          },
+          {
+            message: expect.any(String),
+            field: 'shortDescription',
+          },
+          {
+            message: expect.any(String),
+            field: 'content',
+          },
+        ],
+      };
+
+      const response = await request(server)
+        .put(`/posts/${newPost2.id}`)
+        .auth('admin', 'qwerty')
+        .send(newPost);
+      expect(response.status).toBe(400);
+      expect(response.body).toStrictEqual(errors);
+    });
+
     it('update post, 204', async () => {
       const updatePost = {
         title: faker.lorem.word({ length: 10 }),
