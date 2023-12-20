@@ -37,7 +37,7 @@ export class BlogQueryRepository {
     };
 
     const blog = await this.BlogModel.find(filter, { _id: 0, __v: 0 })
-      .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
+      .sort({ [sortBy]: sortDirection === 'asc' ? 1 : -1 })
       .skip(pageSize * (pageNumber - 1))
       .limit(pageSize);
 

@@ -68,12 +68,6 @@ export class UserService {
     return this.userRepository.findUserId(userId);
   }
 
-  async findUserByLoginOrEmail(
-    loginOrEmail: string,
-  ): Promise<UserEntity | null> {
-    return this.userRepository.findUserByLoginOrEmail(loginOrEmail);
-  }
-
   async updateUserByConfirmationCode(
     userId: string,
     newCodeConfirmation: string,

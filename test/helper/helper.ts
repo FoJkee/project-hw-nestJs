@@ -103,7 +103,7 @@ export class TestingUser {
   }
   async createUserForPagination() {
     const userData1 = {
-      login: 'kuracava',
+      login: 'kuraga',
       password: '1234567',
       email: 'abelardo@gmail.com',
     };
