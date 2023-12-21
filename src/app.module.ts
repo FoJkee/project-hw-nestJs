@@ -44,6 +44,8 @@ import { MailerConfigService } from './config/mailer.config';
 import { BlogValidator } from './validators/blog.validator';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerConfigService } from './config/throttle.config';
+import { RefreshTokenGuard } from './guard/refreshToken.guard';
+import { BearerAuthGuard } from './guard/bearer.auth.guard';
 
 const repositories = [
   BlogRepository,
@@ -76,6 +78,8 @@ const settings = [
   LoginValidator,
   EmailValidator,
   BlogValidator,
+  RefreshTokenGuard,
+  BearerAuthGuard,
 ];
 
 const controllers = [
@@ -103,13 +107,13 @@ const schemas = [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
-    // ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000,
-        limit: 5,
-      },
-    ]),
+    ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 10000,
+    //     limit: 5,
+    //   },
+    // ]),
     MongooseModule.forFeature(schemas),
   ],
   controllers: [...controllers],

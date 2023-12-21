@@ -16,7 +16,7 @@ export class ThrottlerConfigService implements ThrottlerOptionsFactory {
     | Promise<ThrottlerModuleOptions>
     | ThrottlerModuleOptions {
     return {
-      throttlers: [{ limit: this.limit!, ttl: this.ttl! }],
+      throttlers: [{ limit: 5, ttl: 10000 }],
     };
   }
 }

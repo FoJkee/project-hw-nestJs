@@ -29,14 +29,10 @@ import { RegistrationConfirmationDto } from '../dto/registration.confirmation.dt
 import { RegistrationEmailResending } from '../dto/registration.email.resending';
 import { BearerAuthGuard } from '../../guard/bearer.auth.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { JwtServicess } from '../jwt/jwt';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtServicess,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   @Post('login')
   @UseGuards(ThrottlerGuard)
   @HttpCode(200)

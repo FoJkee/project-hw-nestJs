@@ -9,6 +9,7 @@ export class UserDto {
   @IsString()
   @Length(6, 20)
   password: string;
+  @IsString()
   @IsEmail()
   @UserFindForEmail()
   email: string;

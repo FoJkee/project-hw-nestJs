@@ -145,7 +145,13 @@ export class AuthService {
 
   async passwordRecovery(email: string) {
     const userEmail = await this.userRepository.findUserByEmail(email);
-    if (!userEmail) throw new BadRequestException();
+    if (!userEmail)
+      throw new BadRequestException([
+        {
+          message: 'Email for user is not found',
+          field: 'email',
+        },
+      ]);
 
     const newCodeConfirmation = randomUUID();
 
