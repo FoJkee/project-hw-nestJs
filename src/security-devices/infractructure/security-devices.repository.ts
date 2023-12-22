@@ -26,15 +26,10 @@ export class SecurityDevicesRepository {
     });
   }
 
-  async findDeviceUserId(
-    deviceId: string,
-    userId: string,
-    lastActiveDate: string,
-  ) {
+  async findDeviceUserId(deviceId: string, userId: string) {
     const result = await this.DeviceModel.findOne({
       deviceId,
       userId,
-      lastActiveDate,
     });
     return result;
   }

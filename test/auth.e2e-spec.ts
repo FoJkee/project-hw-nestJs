@@ -363,13 +363,16 @@ describe('auth', () => {
         .send({});
       expect(response.status).toBe(401);
     });
+
     it('refresh-token user', async () => {
       const response = await request(server)
         .post('/auth/refresh-token')
         .set('Cookie', cookie)
         .send({});
+
       cookie = response.get('Set-Cookie');
       expect(response.body.accessToken).toBeDefined();
+      expect(cookie).toBeDefined();
     });
   });
   it('login user', async () => {

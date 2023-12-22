@@ -165,22 +165,27 @@ describe('blogs', () => {
     // });
 
     it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
-      //const blogs = []
-      //const sortingBlogs = blogs.sort(name asc)
-      //const blogsFromResponse = app.req(sortBy=name&sortDirection=asc)
-      //expect(blogsFromResponse.body).toEqual(sortingBlogs)
+      // const blogs = []
+      // const sortingBlogs = blogs.sort(name asc)
+      // const blogsFromResponse = app.req(sortBy=name&sortDirection=asc)
+      // expect(blogsFromResponse.body).toEqual(sortingBlogs)
 
-      // const blogs = [newBlog1, newBlog2];
+      const blogs = [newBlog1, newBlog2];
 
-      // const sortingBlogs = blogs.sort((a, b) => {
-      //   return b.createdAt - a.createdAt;
-      // });
+      const sortingBlogs = blogs.sort((a, b) => {
+        if (a.createdAt < b.createdAt) return -1;
+        if (a.createdAt > b.createdAt) return 1;
+        return 0;
+      }); //as asc
+      //const data = Date.now();
+      //getData преобразовать к числу
 
       const response = await request(server).get('/blogs').query({
         sortBy: 'createdAt',
         sortDirection: 'asc',
       });
       expect(response.status).toBe(200);
+      expect(response.body.items).toEqual(sortingBlogs);
       expect(response.body.items[0].id < response.body.items[1].id).toBe(true);
 
       expect(response.body).toEqual({

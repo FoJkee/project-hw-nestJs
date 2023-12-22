@@ -44,7 +44,7 @@ export class JwtServicess {
   // }
 
   async getLastActiveDateFromToken(token: string) {
-    const result: any = this.jwtService.decode(token);
+    const result: any = await this.jwtService.decode(token);
     return new Date(result.iat * 1000).toISOString();
   }
 
@@ -71,12 +71,11 @@ export class JwtServicess {
     }
   }
 
-  async verifyAccessToken(token: string) {
+  async verifyAccessToken(accessToken: string) {
     try {
-      const res: any = await this.jwtService.verifyAsync(token, {
+      return await this.jwtService.verifyAsync(accessToken, {
         secret: this.accessJwtSecret,
       });
-      return { userId: res.userId };
     } catch (e) {
       return null;
     }

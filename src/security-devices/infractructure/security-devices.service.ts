@@ -35,16 +35,8 @@ export class SecurityDevicesService {
     );
   }
 
-  async findDeviceUserId(
-    deviceId: string,
-    userId: string,
-    lastActiveDate: string,
-  ) {
-    return this.securityDevicesRepository.findDeviceUserId(
-      deviceId,
-      userId,
-      lastActiveDate,
-    );
+  async findDeviceUserId(deviceId: string, userId: string) {
+    return this.securityDevicesRepository.findDeviceUserId(deviceId, userId);
   }
 
   async deleteDeviceId(deviceId: string, userId: string) {

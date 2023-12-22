@@ -60,39 +60,28 @@ export class AuthService {
     );
   }
 
-  async refreshToken(
-    token: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(token: string) {
     const dataToken = await this.jwtService.verifyRefreshToken(token);
     if (!dataToken) throw new UnauthorizedException();
-
     const user = await this.userService.findUserId(dataToken.userId);
     if (!user) throw new UnauthorizedException();
 
-    const lastActiveDate = new Date(dataToken.iat * 1000).toISOString();
-
-    const findDeviceUser = await this.securityDevicesService.findDeviceUserId(
-      dataToken.deviceId,
-      dataToken.userId,
-      lastActiveDate,
-    );
-    if (!findDeviceUser) throw new UnauthorizedException();
-
-    const { accessToken, refreshToken } =
+    const { accessToken: accessTokenNew, refreshToken: refreshTokenNew } =
       await this.jwtService.createAccessAndRefreshToken(
         dataToken.deviceId,
         dataToken.userId,
       );
 
     const newDataToken =
-      await this.jwtService.getLastActiveDateFromToken(refreshToken);
+      await this.jwtService.getLastActiveDateFromToken(refreshTokenNew);
 
     await this.securityDevicesService.updateDevice(
       dataToken.userId,
       dataToken.deviceId,
       newDataToken,
     );
-    return { accessToken, refreshToken };
+
+    return { accessTokenNew, refreshTokenNew };
   }
 
   // async refreshToken(token: string) {

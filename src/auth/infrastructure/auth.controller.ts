@@ -75,15 +75,7 @@ export class AuthController {
   async logout(
     @RefreshTokenDecorator() deviceDto: DeviceDto,
     @User() user: UserEntity,
-    // @RefreshToken() token: string,
-    // @Req() req: Request,
-    // @Res() res: Response,
   ) {
-    // const refreshToken = req.cookies.refreshToken;
-    //
-    // const dataToken = await this.jwtService.verifyRefreshToken(refreshToken);
-    // if (!dataToken) throw new UnauthorizedException();
-
     const result = await this.authService.logout(deviceDto, user.id);
     if (!result) throw new UnauthorizedException();
     return;
@@ -94,21 +86,21 @@ export class AuthController {
   @HttpCode(200)
   async refreshToken(
     @RefreshToken() token: string,
-    // @RefreshTokenDecorator() token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // const result = await this.authService.refreshToken(token);
-    // if (!result) return null;
-    // const { accessToken, refreshToken } = result;
+    if (!token) throw new UnauthorizedException();
+    try {
+      const { accessTokenNew, refreshTokenNew } =
+        await this.authService.refreshToken(token);
 
-    const { accessToken, refreshToken } =
-      await this.authService.refreshToken(token);
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
-    return { accessToken: accessToken };
+      res.cookie('refreshToken', refreshTokenNew, {
+        httpOnly: true,
+        secure: true,
+      });
+      return { accessToken: accessTokenNew };
+    } catch (e) {
+      throw new UnauthorizedException();
+    }
   }
 
   // @Post('refresh-token')

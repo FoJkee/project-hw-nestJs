@@ -16,8 +16,5 @@ export const RefreshToken = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): boolean => {
     const request = ctx.switchToHttp().getRequest();
     return request.cookies.refreshToken;
-    // const refreshToken = request.cookies.refreshToken;
-    // if (!refreshToken) throw new UnauthorizedException();
-    // return true;
   },
 );
