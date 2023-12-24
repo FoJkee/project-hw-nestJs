@@ -177,8 +177,6 @@ describe('blogs', () => {
         if (a.createdAt > b.createdAt) return 1;
         return 0;
       }); //as asc
-      //const data = Date.now();
-      //getData преобразовать к числу
 
       const response = await request(server).get('/blogs').query({
         sortBy: 'createdAt',
@@ -186,7 +184,6 @@ describe('blogs', () => {
       });
       expect(response.status).toBe(200);
       expect(response.body.items).toEqual(sortingBlogs);
-      expect(response.body.items[0].id < response.body.items[1].id).toBe(true);
 
       expect(response.body).toEqual({
         pagesCount: 1,

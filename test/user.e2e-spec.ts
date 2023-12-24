@@ -204,4 +204,25 @@ describe('user', () => {
       expect(responseAfter.status).toBe(404);
     });
   });
+
+  describe('GET', () => {
+    it('GET users', async () => {
+      const res = await request(server).get('/users').expect(200);
+      expect(res.body.name).toBe('User');
+    });
+  });
+  describe('POST', () => {
+    it('+ POST create the user with correct data', async function () {
+      const res = await request(server)
+        .post('/users')
+        .send({
+          name: 'Vanya',
+          login: 'ambition',
+          password: 'qwerty',
+        })
+        .expect(201);
+      expect(res.body.name).toBe('Vanya');
+      expect(res.body.login).toBe('ambition');
+    });
+  });
 });
