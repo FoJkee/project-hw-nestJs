@@ -3,8 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { config } from 'dotenv';
 import * as process from 'process';
+import { Injectable } from '@nestjs/common';
 config();
-
+@Injectable()
 export class MailerConfigService implements MailerOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 

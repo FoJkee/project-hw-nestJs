@@ -1,6 +1,8 @@
 import { ThrottlerOptionsFactory } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { ThrottlerModuleOptions } from '@nestjs/throttler/dist/throttler-module-options.interface';
+import { Injectable } from '@nestjs/common';
+@Injectable()
 export class ThrottlerConfigService implements ThrottlerOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
   //

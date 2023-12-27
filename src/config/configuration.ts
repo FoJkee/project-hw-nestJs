@@ -4,7 +4,7 @@ import * as process from 'process';
 config();
 
 export default () => ({
-  port: process.env.PORT,
+  port: process.env.PORT || 5050,
   mongo_uri: process.env.MONGO_URI,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET,
   jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,

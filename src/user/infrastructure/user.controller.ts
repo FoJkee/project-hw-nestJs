@@ -35,13 +35,7 @@ export class UserController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   async createUser(@Body() userDto: UserDto) {
-    const fullUser = (await this.userService.createUser(userDto)) as UserEntity;
-    return {
-      id: fullUser.id,
-      login: fullUser.login,
-      email: fullUser.email,
-      createdAt: fullUser.createdAt,
-    };
+    return await this.userService.createUser(userDto);
   }
   @UseGuards(BasicAuthGuard)
   @Delete('/users/:userId')

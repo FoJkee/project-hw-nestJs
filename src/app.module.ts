@@ -46,6 +46,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerConfigService } from './config/throttle.config';
 import { RefreshTokenGuard } from './guard/refreshToken.guard';
 import { BearerAuthGuard } from './guard/bearer.auth.guard';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfigService } from './config/typeOrm.config';
+import { UserRepositorySql } from './user/infrastructure/user.repository.sql';
 
 const repositories = [
   BlogRepository,
@@ -57,6 +60,7 @@ const repositories = [
   ReactionRepository,
   SecurityDevicesRepository,
   UserQueryRepository,
+  UserRepositorySql,
 ];
 
 const services = [
@@ -108,12 +112,7 @@ const schemas = [
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     MailerModule.forRootAsync({ useClass: MailerConfigService }),
     ThrottlerModule.forRootAsync({ useClass: ThrottlerConfigService }),
-    // ThrottlerModule.forRoot([
-    //   {
-    //     ttl: 10000,
-    //     limit: 5,
-    //   },
-    // ]),
+    TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     MongooseModule.forFeature(schemas),
   ],
   controllers: [...controllers],

@@ -33,16 +33,6 @@ export class UserQueryRepository {
         { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
       ],
     };
-
-    // if (searchEmailTerm && searchLoginTerm) {
-    // }
-    // if (searchEmailTerm) {
-    //   filter.email = { $regex: searchEmailTerm, $options: 'i' };
-    // }
-    // if (searchLoginTerm) {
-    //   filter.login = { $regex: searchLoginTerm, $options: 'i' };
-    // }
-
     const users = await this.UserModel.find(filter, {
       _id: 0,
       __v: 0,

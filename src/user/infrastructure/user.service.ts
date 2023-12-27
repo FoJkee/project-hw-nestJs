@@ -12,12 +12,14 @@ import { UserQueryRepository } from './user.query.repository';
 import { UserQueryDto } from '../dto/user.query.dto';
 import { PaginationView } from '../../pagination/pagination';
 import { randomUUID } from 'crypto';
+import { UserRepositorySql } from './user.repository.sql';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly userQueryRepository: UserQueryRepository,
+    private readonly userRepositorySql: UserRepositorySql,
   ) {}
   async getUser(
     userQueryDto: UserQueryDto,
@@ -41,9 +43,10 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    const result = await this.userRepository.createUser({ ...newUser });
-    if (!result) throw new BadRequestException();
-    return newUser;
+    // const result = await this.userRepository.createUser({ ...newUser });
+    return await this.userRepositorySql.createUser(newUser);
+    // if (!result) throw new BadRequestException();
+    // return newUser;
   }
 
   async deleteUserId(userId: string) {
