@@ -29,14 +29,14 @@ export class UserService {
 
   async createUser(userDto: UserDto): Promise<UserEntity | null> {
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(userDto.password, salt);
+    const password = await bcrypt.hash(userDto.password, salt);
 
     const newUser: UserEntity = {
       id: randomUUID(),
       login: userDto.login,
       email: userDto.email,
       createdAt: new Date().toISOString(),
-      passwordHash,
+      password: password,
       emailConfirmation: {
         codeConfirmation: randomUUID(),
         expirationDate: new Date().toISOString(),
@@ -50,9 +50,9 @@ export class UserService {
   }
 
   async deleteUserId(userId: string) {
-    const user = await this.userRepository.findUserId(userId);
+    const user = await this.userRepositorySql.findUserId(userId);
     if (!user) throw new NotFoundException();
-    return this.userRepository.deleteUserId(userId);
+    return this.userRepositorySql.deleteUserId(userId);
   }
 
   async validateUserAndPass(
@@ -62,13 +62,13 @@ export class UserService {
     const user = await this.userRepository.findUserByLoginOrEmail(loginOrEmail);
     if (!user) return null;
 
-    const comparePassword = await bcrypt.compare(password, user.passwordHash);
+    const comparePassword = await bcrypt.compare(password, user.password);
     if (!comparePassword) return null;
     return user;
   }
 
   async findUserId(userId: string): Promise<UserViewModels | null> {
-    return this.userRepository.findUserId(userId);
+    return this.userRepositorySql.findUserId(userId);
   }
 
   async updateUserByConfirmationCode(
@@ -86,13 +86,7 @@ export class UserService {
   }
   async findUserAndUpdateByConfirmationCode(code: string) {
     const user = await this.userRepository.findUserByConfirmationCode(code);
-    if (!user)
-      throw new BadRequestException([
-        // {
-        //   message: 'invalid code',
-        //   field: 'code',
-        // },
-      ]);
+    if (!user) throw new BadRequestException();
     if (user.emailConfirmation.isConfirmed)
       throw new BadRequestException([
         {

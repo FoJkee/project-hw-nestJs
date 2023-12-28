@@ -36,7 +36,7 @@ export class UserQueryRepository {
     const users = await this.UserModel.find(filter, {
       _id: 0,
       __v: 0,
-      passwordHash: 0,
+      password: 0,
       emailConfirmation: 0,
     })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })

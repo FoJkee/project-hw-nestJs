@@ -28,7 +28,7 @@ export class UserRepository {
   async _findUserId(userId: string): Promise<UserViewModels | null> {
     return this.UserModel.findOne(
       { id: userId },
-      { _id: 0, __v: 0, passwordHash: 0, emailConfirmation: 0 },
+      { _id: 0, __v: 0, password: 0, emailConfirmation: 0 },
     );
   }
 
@@ -78,7 +78,9 @@ export class UserRepository {
   async updateUserPassword(userId: string, passwordHash: string) {
     return this.UserModel.updateOne(
       { id: userId },
-      { $set: { passwordHash, 'emailConfirmation.isConfirmed': true } },
+      {
+        $set: { password: passwordHash, 'emailConfirmation.isConfirmed': true },
+      },
     );
   }
 

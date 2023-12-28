@@ -6,7 +6,7 @@ export class UserViewModels {
     public login: string,
     public email: string,
     public createdAt: string = new Date().toISOString(),
-    public passwordHash: string,
+    public password: string,
     public emailConfirmation: emailConfirmation,
   ) {}
 }

@@ -24,7 +24,7 @@ export class UserEntity {
   @Prop({ required: true, type: String })
   createdAt: string;
   @Prop({ required: true, type: String })
-  passwordHash: string;
+  password: string;
   @Prop({ required: true, type: emailConfirmationSchema })
   emailConfirmation: emailConfirmation;
 }

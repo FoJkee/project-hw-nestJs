@@ -35,7 +35,11 @@ export class UserController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   async createUser(@Body() userDto: UserDto) {
-    return await this.userService.createUser(userDto);
+    try {
+      return await this.userService.createUser(userDto);
+    } catch (e) {
+      throw new NotFoundException();
+    }
   }
   @UseGuards(BasicAuthGuard)
   @Delete('/users/:userId')
