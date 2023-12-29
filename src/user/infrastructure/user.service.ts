@@ -24,7 +24,7 @@ export class UserService {
   async getUser(
     userQueryDto: UserQueryDto,
   ): Promise<PaginationView<UserViewModels[]>> {
-    return this.userQueryRepository.getUsers(userQueryDto);
+    return this.userRepositorySql.getUsers(userQueryDto);
   }
 
   async createUser(userDto: UserDto): Promise<UserEntity | null> {

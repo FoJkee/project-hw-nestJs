@@ -16,9 +16,8 @@ import { PaginationView } from '../../pagination/pagination';
 import { UserViewModels } from '../models/user.view.models';
 import { UserDto } from '../dto/user.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
-import { UserEntity } from '../models/user.schema';
 
-@Controller()
+@Controller('sa')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

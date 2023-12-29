@@ -3,6 +3,8 @@ import { UserEntity } from '../models/user.schema';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UserViewModels } from '../models/user.view.models';
+import { pagination, PaginationView } from '../../pagination/pagination';
+import { UserQueryDto } from '../dto/user.query.dto';
 
 @Injectable()
 export class UserRepositorySql {
@@ -21,13 +23,7 @@ export class UserRepositorySql {
     where email = '${email}'
    `);
   }
-  // async _findUserId(userId: string): Promise<UserViewModels | null> {
-  //   return this.UserModel.findOne(
-  //     { id: userId },
-  //     { _id: 0, __v: 0, passwordHash: 0, emailConfirmation: 0 },
-  //   );
-  // }
-  //
+
   async findUserId(userId: string): Promise<UserViewModels | null> {
     return await this.dataSource.query(`
     select * from public."users"
@@ -50,22 +46,6 @@ export class UserRepositorySql {
     where email = '${loginOrEmail}' or login = '${loginOrEmail}'
     `);
   }
-
-  // async updateUserByConfirmationCode(
-  //   userId: string,
-  //   newCodeConfirmation: string,
-  // ) {
-  //   return this.UserModel.findOneAndUpdate(
-  //     { id: userId },
-  //     {
-  //       $set: {
-  //         'emailConfirmation.codeConfirmation': newCodeConfirmation,
-  //       },
-  //     },
-  //     { returnDocument: 'after' },
-  //   );
-  // }
-  //
 
   async updateUserByConfirmationCode(
     userId: string,
@@ -101,59 +81,59 @@ export class UserRepositorySql {
     
       `);
   }
-  async getUsers() {
-    // userQueryDto: UserQueryDto
-    // const { sortBy, pageSize, pageNumber, sortDirection } =
-    //   pagination(userQueryDto);
-    //
-    // const searchEmailTerm = userQueryDto.searchEmailTerm
-    //   ? userQueryDto.searchEmailTerm.toString()
-    //   : '';
-    // const searchLoginTerm = userQueryDto.searchLoginTerm
-    //   ? userQueryDto.searchLoginTerm.toString()
-    //   : '';
-    //
-    // const filter: any = {
-    //   $and: [
-    //     { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
-    //
-    //     { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
-    //   ],
-    // };
-    // const users = await this.UserModel.find(filter, {
-    //   _id: 0,
-    //   __v: 0,
-    //   passwordHash: 0,
-    //   emailConfirmation: 0,
-    // })
-    //   .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })
-    //   .skip(pageSize * (pageNumber - 1))
-    //   .limit(pageSize);
-    // const userCountDocument: number =
-    //   await this.UserModel.countDocuments(filter);
-    // return {
-    //   pagesCount: Math.ceil(userCountDocument / pageSize),
-    //   page: pageNumber,
-    //   pageSize: pageSize,
-    //   totalCount: userCountDocument,
-    //   items: users,
-    // return this.dataSource.query(SELECT *  FROM public."newUsers"),
+  async getUsers(
+    userQueryDto: UserQueryDto,
+  ): Promise<PaginationView<UserViewModels[]>> {
+    const { sortBy, pageSize, pageNumber, sortDirection } =
+      pagination(userQueryDto);
+
+    const searchEmailTerm = userQueryDto.searchEmailTerm
+      ? userQueryDto.searchEmailTerm.toString()
+      : '';
+    const searchLoginTerm = userQueryDto.searchLoginTerm
+      ? userQueryDto.searchLoginTerm.toString()
+      : '';
+
+    const userCount = await this.dataSource.query(`
+        select count(*) as "total"
+      from public."users" u
+      where u."email" LIKE '%${searchEmailTerm}%' OR u."login" LIKE '%${searchLoginTerm}%'
+    `);
+
+    const count = +userCount[0].total;
+    const pageSkip = pageSize * (pageNumber - 1);
+
+    const users = await this.dataSource.query(`
+        select u."id", u."login", u."email", u."createdAt"
+        from "users" u
+        where u."login" LIKE '${searchEmailTerm}%' OR u."email" LIKE '%${searchLoginTerm}%'
+        ORDER BY "${sortBy}" ${sortDirection}
+        OFFSET ${pageSkip} LIMIT ${pageSize}
+    `);
+
+    return {
+      pagesCount: Math.ceil(count / pageSize),
+      page: pageNumber,
+      pageSize: pageSize,
+      totalCount: count,
+      items: users,
+    };
   }
 
   async createUser(newUser: UserEntity): Promise<UserEntity | null> {
     await this.dataSource.query(`
-        INSERT INTO "users"("login", "email", "createdAt", "password", "codeConfirmation", "expirationDate", "isConfirmed")
+        INSERT INTO public."users"("login", "email", "createdAt", "password", "codeConfirmation", "expirationDate", "isConfirmed")
         VALUES ('${newUser.login}', '${newUser.email}', '${newUser.createdAt}', '${newUser.password}',
                 '${newUser.emailConfirmation.codeConfirmation}',
                 '${newUser.emailConfirmation.expirationDate}', '${newUser.emailConfirmation.isConfirmed}')`);
 
-    const res = await this.dataSource.query(`
-     select "id", "email", "login", "createdAt" from "users" 
-     order by "createdAt" desc 
-     `);
-
-    return res[0];
-
+    const result = await this.dataSource.query(`
+        select u."id", u."login", u."email", u."createdAt"
+        from public."users" u
+        order by u."createdAt" desc 
+        OFFSET 0 LIMIT 1
+    `);
+    return result[0];
     // return {
     //   id: result.id,
     //   login: result.login,

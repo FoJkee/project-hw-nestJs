@@ -6,7 +6,7 @@ export class TestingController {
   constructor(protected testingService: TestingService) {}
   @Delete('all-data')
   @HttpCode(204)
-  async deleteAll() {
+  async deleteAll(): Promise<boolean> {
     return this.testingService.deleteAll();
   }
 }

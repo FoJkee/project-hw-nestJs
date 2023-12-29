@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserEntity, UserDocument } from '../models/user.schema';
 import { Model } from 'mongoose';
 import { UserViewModels } from '../models/user.view.models';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserRepository {
@@ -63,7 +62,6 @@ export class UserRepository {
       {
         $set: {
           'emailConfirmation.codeConfirmation': newCodeConfirmation,
-          // 'emailConfirmation.isConfirmed': false,
         },
       },
       { returnDocument: 'after' },
