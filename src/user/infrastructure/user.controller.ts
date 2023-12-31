@@ -16,6 +16,7 @@ import { PaginationView } from '../../pagination/pagination';
 import { UserViewModels } from '../models/user.view.models';
 import { UserDto } from '../dto/user.dto';
 import { BasicAuthGuard } from '../../guard/basic.auth.guard';
+import { UserEntity } from '../models/user.schema';
 
 @Controller('sa')
 export class UserController {
@@ -34,18 +35,20 @@ export class UserController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   async createUser(@Body() userDto: UserDto) {
-    try {
-      return await this.userService.createUser(userDto);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+    const fullUser = (await this.userService.createUser(userDto)) as UserEntity;
+    return {
+      id: fullUser.id.toString(),
+      login: fullUser.login,
+      email: fullUser.email,
+      createdAt: fullUser.createdAt,
+    };
   }
   @UseGuards(BasicAuthGuard)
   @Delete('/users/:userId')
   @HttpCode(204)
-  async deleteUserId(@Param('userId') userId: string): Promise<boolean> {
+  async deleteUserId(@Param('userId') userId: string) {
     try {
-      return this.userService.deleteUserId(userId);
+      return await this.userService.deleteUserId(userId);
     } catch (e) {
       throw new NotFoundException();
     }

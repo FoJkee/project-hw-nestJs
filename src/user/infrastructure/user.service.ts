@@ -43,23 +43,23 @@ export class UserService {
         isConfirmed: false,
       },
     };
-    // const result = await this.userRepository.createUser({ ...newUser });
-    return await this.userRepositorySql.createUser(newUser);
-    // if (!result) throw new BadRequestException();
-    // return newUser;
+    const result = await this.userRepositorySql.createUser({ ...newUser });
+    if (!result) throw new BadRequestException();
+    return newUser;
   }
 
   async deleteUserId(userId: string) {
     const user = await this.userRepositorySql.findUserId(userId);
     if (!user) throw new NotFoundException();
-    return this.userRepositorySql.deleteUserId(userId);
+    return await this.userRepositorySql.deleteUserId(userId);
   }
 
   async validateUserAndPass(
     loginOrEmail: string,
     password: string,
-  ): Promise<UserEntity | null> {
-    const user = await this.userRepository.findUserByLoginOrEmail(loginOrEmail);
+  ): Promise<UserViewModels | null> {
+    const user =
+      await this.userRepositorySql.findUserByLoginOrEmail(loginOrEmail);
     if (!user) return null;
 
     const comparePassword = await bcrypt.compare(password, user.password);
@@ -67,25 +67,27 @@ export class UserService {
     return user;
   }
 
-  async findUserId(userId: string): Promise<UserViewModels | null> {
-    return this.userRepositorySql.findUserId(userId);
+  async findUserId(userId: string) {
+    return await this.userRepositorySql.findUserId(userId);
   }
 
   async updateUserByConfirmationCode(
     userId: string,
     newCodeConfirmation: string,
   ) {
-    return this.userRepository.updateUserByConfirmationCode(
+    return this.userRepositorySql.updateUserByConfirmationCode(
       userId,
       newCodeConfirmation,
     );
   }
 
   async findUserByConfirmationCode(code: string) {
-    return this.userRepository.findUserByConfirmationCode(code);
+    return this.userRepositorySql.findUserByConfirmationCode(code);
   }
+
   async findUserAndUpdateByConfirmationCode(code: string) {
-    const user = await this.userRepository.findUserByConfirmationCode(code);
+    const user = await this.userRepositorySql.findUserByConfirmationCode(code);
+    console.log('user', user);
     if (!user) throw new BadRequestException();
     if (user.emailConfirmation.isConfirmed)
       throw new BadRequestException([
@@ -94,7 +96,7 @@ export class UserService {
           field: 'code',
         },
       ]);
-    await this.userRepository.findUserAndUpdateByConfirmationCode(user.id);
+    await this.userRepositorySql.findUserAndUpdateByConfirmationCode(user.id);
     return;
   }
 

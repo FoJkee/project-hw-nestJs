@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
@@ -14,6 +15,7 @@ import { EmailService } from '../../email/email.service';
 import { NewPasswordDto } from '../dto/newpassword.dto';
 import { UserRepository } from '../../user/infrastructure/user.repository';
 import { DeviceDto } from '../../security-devices/dto/device.dto';
+import { UserRepositorySql } from '../../user/infrastructure/user.repository.sql';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +25,7 @@ export class AuthService {
     private readonly securityDevicesService: SecurityDevicesService,
     private readonly emailService: EmailService,
     private readonly userRepository: UserRepository,
+    private readonly userRepositorySql: UserRepositorySql,
   ) {}
 
   async login(loginDto: LoginDto, ip: string, deviceName: string) {
@@ -84,45 +87,22 @@ export class AuthService {
     return { accessTokenNew, refreshTokenNew };
   }
 
-  // async refreshToken(token: string) {
-  //   const activeToken = await this.jwtService.getLastActiveDateFromToken(token);
-  //   if (!activeToken) throw new UnauthorizedException();
-  //
-  //   const dataToken = await this.jwtService.verifyRefreshToken(token);
-  //   if (!dataToken) throw new UnauthorizedException();
-  //   const user = await this.userService.findUserId(dataToken.userId);
-  //   if (!user) throw new UnauthorizedException();
-  //
-  //   const accessToken = await this.jwtService.createAccessToken(
-  //     user.id,
-  //     dataToken.deviceId,
-  //   );
-  //   const newRefreshToken = await this.jwtService.createRefreshToken(
-  //     user.id,
-  //     dataToken.deviceId,
-  //   );
-  //
-  //   const newDataToken =
-  //     await this.jwtService.getLastActiveDateFromToken(newRefreshToken);
-  //
-  //   await this.securityDevicesService.updateDevice(
-  //     user.id,
-  //     dataToken.deviceId,
-  //     newDataToken,
-  //   );
-  //   return { accessToken, newRefreshToken };
-  // }
-
   async registration(registrationDto: RegistrationDto) {
     const newUser = await this.userService.createUser(registrationDto);
-
+    console.log('newUser', newUser);
     if (!newUser) throw new BadRequestException();
+
+    console.log(
+      'newUser.emailConfirmation.codeConfirmation',
+      newUser.emailConfirmation.codeConfirmation,
+    );
+
     await this.emailService.sendEmail(
       newUser.email,
       'Registration',
       `<h1>Registation</h1>
             <p>To finish registration please follow the link below:
-             <a href="https://somesite.com/confirm-email?code=${newUser.emailConfirmation?.codeConfirmation}">complete registration</a>
+             <a href="https://somesite.com/confirm-email?code=${newUser.emailConfirmation.codeConfirmation}">complete registration</a>
             </p>`,
     );
 
@@ -135,7 +115,7 @@ export class AuthService {
   async passwordRecovery(email: string) {
     const userEmail = await this.userRepository.findUserByEmail(email);
     if (!userEmail)
-      throw new BadRequestException([
+      throw new NotFoundException([
         {
           message: 'Email for user is not found',
           field: 'email',
@@ -174,7 +154,7 @@ export class AuthService {
   }
 
   async registrationEmailResending(email: string) {
-    const userEmail = await this.userRepository.findUserByEmail(email);
+    const userEmail = await this.userRepositorySql.findUserByEmail(email);
     if (!userEmail)
       throw new BadRequestException([
         {
@@ -182,6 +162,7 @@ export class AuthService {
           field: 'email',
         },
       ]);
+
     if (userEmail.emailConfirmation.isConfirmed)
       throw new BadRequestException([
         {

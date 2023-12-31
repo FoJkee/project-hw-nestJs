@@ -5,64 +5,110 @@ import { DataSource } from 'typeorm';
 import { UserViewModels } from '../models/user.view.models';
 import { pagination, PaginationView } from '../../pagination/pagination';
 import { UserQueryDto } from '../dto/user.query.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserRepositorySql {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   async findUserByLogin(login: string): Promise<UserEntity> {
-    return this.dataSource.query(`
-    select * from "users"
-    where login = ${login}
-    `);
+    const user = await this.dataSource.query(
+      `
+    select u.id
+    from "users" u
+    where login = $1
+    `,
+      [login],
+    );
+    return user[0] ? user[0] : null;
   }
 
   async findUserByEmail(email: string): Promise<UserEntity> {
-    return this.dataSource.query(`
-    select * from "users"
-    where email = '${email}'
-   `);
+    const user = await this.dataSource.query(
+      `
+    select u.id
+    from "users" u
+    where email = $1
+   `,
+      [email],
+    );
+    return user[0] ? user[0] : null;
   }
 
-  async findUserId(userId: string): Promise<UserViewModels | null> {
-    return await this.dataSource.query(`
-    select * from public."users"
-    where id = '${userId}'
-    `);
+  async findUserId(userId: string) {
+    const user = await this.dataSource.query(
+      `
+    select *
+    from "users"
+    where id = $1
+    `,
+      [userId],
+    );
+    if (user[0]) {
+      return {
+        id: user[0].id,
+      };
+    } else {
+      return null;
+    }
   }
-  //
+
   async deleteUserId(userId: string): Promise<boolean> {
-    await this.dataSource.query(`
-     delete from "users"
-    where id = '${userId}'
-    `);
+    await this.dataSource.query(
+      `
+     delete
+     from "users"
+     where id = $1
+    `,
+      [userId],
+    );
     return true;
   }
-  async findUserByLoginOrEmail(
-    loginOrEmail: string,
-  ): Promise<UserEntity | null> {
-    return this.dataSource.query(`
-    select * from "users" 
-    where email = '${loginOrEmail}' or login = '${loginOrEmail}'
-    `);
+  async findUserByLoginOrEmail(loginOrEmail: string) {
+    const user = await this.dataSource.query(
+      `
+    select u.id, u.login, u.email, u.password
+    from "users" u
+    where login = $1 or email = $1
+    `,
+      [loginOrEmail],
+    );
+    if (user[0]) {
+      return {
+        id: user[0].id,
+        login: user[0].login,
+        password: user[0].password,
+      } as UserEntity;
+    } else {
+      return null;
+    }
   }
 
   async updateUserByConfirmationCode(
     userId: string,
     newCodeConfirmation: string,
   ) {
-    return this.dataSource.query(`
+    return await this.dataSource.query(
+      `
     update users
-    set codeConfirmation = '${newCodeConfirmation}'
-    where id = '${userId}'
-    `);
+    set "codeConfirmation" = $2
+    where id = $1
+    `,
+      [userId, newCodeConfirmation],
+    );
   }
 
   async findUserByConfirmationCode(code: string) {
-    return this.dataSource.query(`
-    select * from "users"
-    where codeConfirmation = '${code}'
-    `);
+    const user = await this.dataSource.query(
+      `
+    select *
+    from "users" 
+    where codeConfirmation = $1
+    `,
+      [code],
+    );
+    console.log('user', user);
+    return user[0] && user[0].isConfirmed !== true ? user[0] : null;
   }
 
   async updateUserPassword(userId: string, password: string) {
@@ -74,12 +120,15 @@ export class UserRepositorySql {
   }
 
   async findUserAndUpdateByConfirmationCode(userId: string) {
-    return await this.dataSource.query(`
+    return await this.dataSource.query(
+      `
       update "users" 
       set "isConfirmed" = true
-          where "id" = ${userId}
+          where "id" = $1
     
-      `);
+      `,
+      [userId],
+    );
   }
   async getUsers(
     userQueryDto: UserQueryDto,
@@ -120,25 +169,28 @@ export class UserRepositorySql {
     };
   }
 
-  async createUser(newUser: UserEntity): Promise<UserEntity | null> {
-    await this.dataSource.query(`
+  async createUser(newUser: UserEntity) {
+    return await this.dataSource.query(
+      `
         INSERT INTO public."users"("login", "email", "createdAt", "password", "codeConfirmation", "expirationDate", "isConfirmed")
-        VALUES ('${newUser.login}', '${newUser.email}', '${newUser.createdAt}', '${newUser.password}',
-                '${newUser.emailConfirmation.codeConfirmation}',
-                '${newUser.emailConfirmation.expirationDate}', '${newUser.emailConfirmation.isConfirmed}')`);
-
-    const result = await this.dataSource.query(`
-        select u."id", u."login", u."email", u."createdAt"
-        from public."users" u
-        order by u."createdAt" desc 
-        OFFSET 0 LIMIT 1
-    `);
-    return result[0];
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        returning "id", "login", "email", "createdAt"
+      `,
+      [
+        newUser.login,
+        newUser.email,
+        newUser.createdAt,
+        newUser.password,
+        newUser.emailConfirmation.codeConfirmation,
+        newUser.emailConfirmation.expirationDate,
+        newUser.emailConfirmation.isConfirmed,
+      ],
+    );
     // return {
-    //   id: result.id,
-    //   login: result.login,
-    //   email: result.email,
-    //   createdAt: result.createdAt,
-    // } as UserEntity;
+    //   id: createUser[0].id.toString(),
+    //   login: createUser[0].login,
+    //   email: createUser[0].email,
+    //   createdAt: createUser[0].createdAt,
+    // };
   }
 }
