@@ -28,5 +28,6 @@ export class UserEntity {
   @Prop({ required: true, type: emailConfirmationSchema })
   emailConfirmation: emailConfirmation;
 }
+
 export type UserDocument = HydratedDocument<UserEntity>;
 export const UserSchema = SchemaFactory.createForClass(UserEntity);

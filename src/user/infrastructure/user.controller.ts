@@ -37,7 +37,7 @@ export class UserController {
   async createUser(@Body() userDto: UserDto) {
     const fullUser = (await this.userService.createUser(userDto)) as UserEntity;
     return {
-      id: fullUser.id.toString(),
+      id: fullUser.id,
       login: fullUser.login,
       email: fullUser.email,
       createdAt: fullUser.createdAt,

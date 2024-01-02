@@ -5,7 +5,6 @@ import { DataSource } from 'typeorm';
 import { UserViewModels } from '../models/user.view.models';
 import { pagination, PaginationView } from '../../pagination/pagination';
 import { UserQueryDto } from '../dto/user.query.dto';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserRepositorySql {
@@ -26,7 +25,7 @@ export class UserRepositorySql {
   async findUserByEmail(email: string): Promise<UserEntity> {
     const user = await this.dataSource.query(
       `
-    select u.id
+    select u.*
     from "users" u
     where email = $1
    `,
@@ -87,15 +86,17 @@ export class UserRepositorySql {
   async updateUserByConfirmationCode(
     userId: string,
     newCodeConfirmation: string,
-  ) {
-    return await this.dataSource.query(
+  ): Promise<UserEntity | null> {
+    const user = await this.dataSource.query(
       `
-    update users
-    set "codeConfirmation" = $2
-    where id = $1
+    update public."users"
+    set "codeConfirmation" = $1 
+    where "id" = $2
+    returning *
     `,
-      [userId, newCodeConfirmation],
+      [newCodeConfirmation, userId],
     );
+    return user[0][0];
   }
 
   async findUserByConfirmationCode(code: string) {
@@ -107,7 +108,6 @@ export class UserRepositorySql {
     `,
       [code],
     );
-    console.log('user', user);
     return user[0] && user[0].isConfirmed !== true ? user[0] : null;
   }
 
@@ -172,8 +172,8 @@ export class UserRepositorySql {
   async createUser(newUser: UserEntity) {
     return await this.dataSource.query(
       `
-        INSERT INTO public."users"("login", "email", "createdAt", "password", "codeConfirmation", "expirationDate", "isConfirmed")
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO public."users"("login", "email", "createdAt", "password", "codeConfirmation", "isConfirmed")
+        VALUES ($1, $2, $3, $4, $5, $6)
         returning "id", "login", "email", "createdAt"
       `,
       [

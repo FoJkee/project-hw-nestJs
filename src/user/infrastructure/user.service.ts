@@ -27,23 +27,21 @@ export class UserService {
     return this.userRepositorySql.getUsers(userQueryDto);
   }
 
-  async createUser(userDto: UserDto): Promise<UserEntity | null> {
+  async createUser(userDto: UserDto) {
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(userDto.password, salt);
 
-    const newUser: UserEntity = {
+    const newUser = {
       id: randomUUID(),
       login: userDto.login,
       email: userDto.email,
-      createdAt: new Date().toISOString(),
       password: password,
-      emailConfirmation: {
-        codeConfirmation: randomUUID(),
-        expirationDate: new Date().toISOString(),
-        isConfirmed: false,
-      },
+      createdAt: new Date().toISOString(),
+      codeConfirmation: randomUUID(),
+      isConfirmed: false,
     };
     const result = await this.userRepositorySql.createUser({ ...newUser });
+
     if (!result) throw new BadRequestException();
     return newUser;
   }
@@ -75,7 +73,7 @@ export class UserService {
     userId: string,
     newCodeConfirmation: string,
   ) {
-    return this.userRepositorySql.updateUserByConfirmationCode(
+    return await this.userRepositorySql.updateUserByConfirmationCode(
       userId,
       newCodeConfirmation,
     );

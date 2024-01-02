@@ -89,13 +89,7 @@ export class AuthService {
 
   async registration(registrationDto: RegistrationDto) {
     const newUser = await this.userService.createUser(registrationDto);
-    console.log('newUser', newUser);
     if (!newUser) throw new BadRequestException();
-
-    console.log(
-      'newUser.emailConfirmation.codeConfirmation',
-      newUser.emailConfirmation.codeConfirmation,
-    );
 
     await this.emailService.sendEmail(
       newUser.email,
@@ -137,9 +131,9 @@ export class AuthService {
             <p>To finish password recovery please follow the link below:
              <a href='https://somesite.com/password-recovery?recoveryCode=${updateUser.emailConfirmation.codeConfirmation}'>recovery password</a></p>`,
     );
-
     return;
   }
+
   async newPassword(newPasswordDto: NewPasswordDto) {
     const user = await this.userService.findUserByConfirmationCode(
       newPasswordDto.recoveryCode,
@@ -155,6 +149,7 @@ export class AuthService {
 
   async registrationEmailResending(email: string) {
     const userEmail = await this.userRepositorySql.findUserByEmail(email);
+    console.log('userEmail', userEmail);
     if (!userEmail)
       throw new BadRequestException([
         {
@@ -163,13 +158,13 @@ export class AuthService {
         },
       ]);
 
-    if (userEmail.emailConfirmation.isConfirmed)
-      throw new BadRequestException([
-        {
-          message: 'email already confirmed',
-          field: 'email',
-        },
-      ]);
+    // if (userEmail.emailConfirmation.isConfirmed === true)
+    //   throw new BadRequestException([
+    //     {
+    //       message: 'email already confirmed',
+    //       field: 'email',
+    //     },
+    //   ]);
 
     const newCodeConfirmation = randomUUID();
 
@@ -177,18 +172,22 @@ export class AuthService {
       userEmail.id,
       newCodeConfirmation,
     );
+    console.log();
+    console.log('updateUser', updateUser); //[[],1]
 
-    // if (updateUser!.emailConfirmation.isConfirmed === true)
-    //   throw new BadRequestException();
+    if (!updateUser) throw new BadRequestException();
+
+    console.log(
+      'updateUser.emailConfirmation.codeConfirmation', //@ts-ignore
+      updateUser.codeConfirmation,
+    );
 
     await this.emailService.sendEmail(
       email,
       'Email resending confirmation',
       `<h1>Email resending confirmation</h1>
             <p>To finish email resending please follow the link below:
-             <a href='https://somesite.com/confirm-email?code=${
-               updateUser!.emailConfirmation.codeConfirmation
-             }'>complete registration</a>
+             <a href='https://somesite.com/confirm-email?code=${updateUser.emailConfirmation?.codeConfirmation}'>complete registration</a>
             </p>`,
     );
 
