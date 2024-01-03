@@ -7,11 +7,7 @@ export class UserViewModels {
     public email: string,
     public createdAt: string = new Date().toISOString(),
     public password: string,
-    public emailConfirmation: emailConfirmation,
+    public codeConfirmation: string = randomUUID(),
+    public isConfirmed: boolean,
   ) {}
-}
-class emailConfirmation {
-  codeConfirmation: string = randomUUID();
-  expirationDate: string = new Date().toISOString();
-  isConfirmed: boolean;
 }

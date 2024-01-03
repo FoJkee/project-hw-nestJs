@@ -181,9 +181,8 @@ export class UserRepositorySql {
         newUser.email,
         newUser.createdAt,
         newUser.password,
-        newUser.emailConfirmation.codeConfirmation,
-        newUser.emailConfirmation.expirationDate,
-        newUser.emailConfirmation.isConfirmed,
+        newUser.codeConfirmation,
+        newUser.isConfirmed,
       ],
     );
     // return {

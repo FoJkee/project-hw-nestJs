@@ -8,7 +8,6 @@ import { UserEntity } from '../models/user.schema';
 import bcrypt from 'bcrypt';
 import { UserViewModels } from '../models/user.view.models';
 import { UserRepository } from './user.repository';
-import { UserQueryRepository } from './user.query.repository';
 import { UserQueryDto } from '../dto/user.query.dto';
 import { PaginationView } from '../../pagination/pagination';
 import { randomUUID } from 'crypto';
@@ -18,7 +17,6 @@ import { UserRepositorySql } from './user.repository.sql';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly userQueryRepository: UserQueryRepository,
     private readonly userRepositorySql: UserRepositorySql,
   ) {}
   async getUser(
@@ -31,7 +29,7 @@ export class UserService {
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(userDto.password, salt);
 
-    const newUser = {
+    const newUser: UserEntity = {
       id: randomUUID(),
       login: userDto.login,
       email: userDto.email,
@@ -40,7 +38,7 @@ export class UserService {
       codeConfirmation: randomUUID(),
       isConfirmed: false,
     };
-    const result = await this.userRepositorySql.createUser({ ...newUser });
+    const result = await this.userRepositorySql.createUser(newUser);
 
     if (!result) throw new BadRequestException();
     return newUser;

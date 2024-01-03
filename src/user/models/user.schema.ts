@@ -25,8 +25,12 @@ export class UserEntity {
   createdAt: string;
   @Prop({ required: true, type: String })
   password: string;
-  @Prop({ required: true, type: emailConfirmationSchema })
-  emailConfirmation: emailConfirmation;
+  // @Prop({ required: true, type: emailConfirmationSchema })
+  // emailConfirmation: emailConfirmation;
+  @Prop({ required: true, type: String })
+  codeConfirmation: string;
+  @Prop({ required: true, type: Boolean, default: false })
+  isConfirmed: boolean;
 }
 
 export type UserDocument = HydratedDocument<UserEntity>;
