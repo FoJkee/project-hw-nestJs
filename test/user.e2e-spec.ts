@@ -40,7 +40,7 @@ describe('user', () => {
   });
   describe('POST', () => {
     it('Unauthorized user, 401', async () => {
-      const response = await request(server).post('/users').send({});
+      const response = await request(server).post('/sa/users').send({});
       expect(response.status).toBe(401);
     });
     it('no data available user, 400', async () => {
@@ -61,7 +61,7 @@ describe('user', () => {
         ],
       };
       const response = await request(server)
-        .post('/users')
+        .post('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' })
         .send({});
 
@@ -91,7 +91,7 @@ describe('user', () => {
         ],
       };
       const response = await request(server)
-        .post('/users')
+        .post('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' })
         .send(user);
 
@@ -102,7 +102,7 @@ describe('user', () => {
     it('correct data user, 201', async () => {
       newUser1 = await testingUser.createUser();
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(response.status).toBe(200);
@@ -110,7 +110,7 @@ describe('user', () => {
     it('correct data user, 201', async () => {
       newUser2 = await testingUser.createUser();
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(response.status).toBe(200);
@@ -118,7 +118,7 @@ describe('user', () => {
     it('correct data user pagination, 201', async () => {
       newUser3 = await testingUser.createUserForPagination();
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(response.status).toBe(200);
@@ -126,12 +126,12 @@ describe('user', () => {
   });
   describe('GET => :id', () => {
     it('Unauthorized user, 401', async () => {
-      const response = await request(server).get('/users');
+      const response = await request(server).get('/sa/users');
       expect(response.status).toBe(401);
     });
     it('pagination: sortBy: createdAt, sortDirection: desc, pageNumber: 1, pageSize: 10', async () => {
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' })
         .query({
           sortBy: 'createdAt',
@@ -150,7 +150,7 @@ describe('user', () => {
     });
     it('pagination: sortBy: createdAt, sortDirection: asc, pageNumber: 1, pageSize: 10', async () => {
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' })
         .query({
           sortBy: 'createdAt',
@@ -170,7 +170,7 @@ describe('user', () => {
 
     it('pagination searchLoginTerm', async () => {
       const response = await request(server)
-        .get('/users')
+        .get('/sa/users')
         .auth('admin', 'qwerty', { type: 'basic' })
         .query({
           searchLoginTerm: 'A',
@@ -181,24 +181,24 @@ describe('user', () => {
   });
   describe('DELETE => :id', () => {
     it('Unauthorized user, 401', async () => {
-      const response = await request(server).get('/users');
+      const response = await request(server).get('/sa/users');
       expect(response.status).toBe(401);
     });
     it('not found, 404', async () => {
       const response = await request(server)
-        .get('/users/-12345')
+        .get('/sa/users/-12345')
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(response.status).toBe(404);
     });
     it('delete user, 204', async () => {
       const response = await request(server)
-        .delete(`/users/${newUser1.id}`)
+        .delete(`/sa/users/${newUser1.id}`)
         .auth('admin', 'qwerty', { type: 'basic' });
       expect(response.status).toBe(204);
 
       const responseAfter = await request(server)
-        .get(`/users/${newUser1.id}`)
+        .get(`/sa/users/${newUser1.id}`)
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(responseAfter.status).toBe(404);
@@ -207,14 +207,14 @@ describe('user', () => {
 
   describe('GET', () => {
     it('GET users', async () => {
-      const res = await request(server).get('/users').expect(200);
+      const res = await request(server).get('/sa/users').expect(200);
       expect(res.body.name).toBe('User');
     });
   });
   describe('POST', () => {
     it('+ POST create the user with correct data', async function () {
       const res = await request(server)
-        .post('/users')
+        .post('/sa/users')
         .send({
           name: 'Vanya',
           login: 'ambition',

@@ -24,9 +24,14 @@ export class UserEntity {
   @Prop({ required: true, type: String })
   createdAt: string;
   @Prop({ required: true, type: String })
-  passwordHash: string;
-  @Prop({ required: true, type: emailConfirmationSchema })
-  emailConfirmation: emailConfirmation;
+  password: string;
+  // @Prop({ required: true, type: emailConfirmationSchema })
+  // emailConfirmation: emailConfirmation;
+  @Prop({ required: true, type: String })
+  codeConfirmation: string;
+  @Prop({ required: true, type: Boolean, default: false })
+  isConfirmed: boolean;
 }
+
 export type UserDocument = HydratedDocument<UserEntity>;
 export const UserSchema = SchemaFactory.createForClass(UserEntity);

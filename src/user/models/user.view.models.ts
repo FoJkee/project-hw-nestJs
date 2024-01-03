@@ -6,12 +6,8 @@ export class UserViewModels {
     public login: string,
     public email: string,
     public createdAt: string = new Date().toISOString(),
-    public passwordHash: string,
-    public emailConfirmation: emailConfirmation,
+    public password: string,
+    public codeConfirmation: string = randomUUID(),
+    public isConfirmed: boolean,
   ) {}
-}
-class emailConfirmation {
-  codeConfirmation: string = randomUUID();
-  expirationDate: string = new Date().toISOString();
-  isConfirmed: boolean;
 }

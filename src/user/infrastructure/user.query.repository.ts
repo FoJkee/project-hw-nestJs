@@ -33,20 +33,10 @@ export class UserQueryRepository {
         { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
       ],
     };
-
-    // if (searchEmailTerm && searchLoginTerm) {
-    // }
-    // if (searchEmailTerm) {
-    //   filter.email = { $regex: searchEmailTerm, $options: 'i' };
-    // }
-    // if (searchLoginTerm) {
-    //   filter.login = { $regex: searchLoginTerm, $options: 'i' };
-    // }
-
     const users = await this.UserModel.find(filter, {
       _id: 0,
       __v: 0,
-      passwordHash: 0,
+      password: 0,
       emailConfirmation: 0,
     })
       .sort({ [sortBy]: sortDirection === 'asc' ? 'asc' : 'desc' })

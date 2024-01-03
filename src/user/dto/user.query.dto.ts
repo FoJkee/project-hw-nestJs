@@ -1,5 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
+import { Prop } from '@nestjs/mongoose';
 
 export class UserQueryDto {
   @IsString()
@@ -7,6 +8,7 @@ export class UserQueryDto {
   @IsString()
   searchEmailTerm: string = '';
   @IsString()
+  @Prop({ default: 'createdAt' })
   sortBy: string = 'createdAt';
   @IsString()
   sortDirection: string = 'desc';

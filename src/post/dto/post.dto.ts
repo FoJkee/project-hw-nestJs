@@ -2,7 +2,6 @@ import { IsString, IsUUID, Length } from 'class-validator';
 import { BlogDecoratorExist } from '../../decorators/blog.decorator';
 import { Transform } from 'class-transformer';
 import { TransformFnParams } from 'class-transformer/types/interfaces';
-
 export class CreatePostForBlogDto {
   @IsString()
   @Transform(({ value }: TransformFnParams) => value.trim())

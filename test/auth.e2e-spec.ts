@@ -209,7 +209,7 @@ describe('auth', () => {
     it('correct code, 204', async () => {
       const response = await request(server)
         .post('/auth/registration-confirmation')
-        .send({ code: user2!.emailConfirmation.codeConfirmation });
+        .send({ code: user2!.codeConfirmation });
 
       expect(response.status).toBe(204);
     });
@@ -257,7 +257,7 @@ describe('auth', () => {
 
       const response = await request(server)
         .post('/auth/new-password')
-        .send({ recoveryCode: user2!.emailConfirmation.codeConfirmation });
+        .send({ recoveryCode: user2!.codeConfirmation });
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual(err);
@@ -303,7 +303,7 @@ describe('auth', () => {
       await request(server)
         .post('/auth/new-password')
         .send({
-          recoveryCode: user2!.emailConfirmation.codeConfirmation,
+          recoveryCode: user2!.codeConfirmation,
           newPassword: '987654321',
         })
         .expect(204);
