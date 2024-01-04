@@ -1,17 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-@Schema()
-class emailConfirmation {
-  @Prop({ required: true, type: String })
-  codeConfirmation: string;
-  @Prop({ required: true, type: String })
-  expirationDate: string;
-  @Prop({ required: true, type: Boolean, default: false })
-  isConfirmed: boolean;
-}
-
-const emailConfirmationSchema = SchemaFactory.createForClass(emailConfirmation);
+// @Schema()
+// class emailConfirmation {
+//   @Prop({ required: true, type: String })
+//   codeConfirmation: string;
+//   @Prop({ required: true, type: String })
+//   expirationDate: string;
+//   @Prop({ required: true, type: Boolean, default: false })
+//   isConfirmed: boolean;
+// }
+//
+// const emailConfirmationSchema = SchemaFactory.createForClass(emailConfirmation);
 
 @Schema()
 export class UserEntity {
@@ -25,8 +25,6 @@ export class UserEntity {
   createdAt: string;
   @Prop({ required: true, type: String })
   password: string;
-  // @Prop({ required: true, type: emailConfirmationSchema })
-  // emailConfirmation: emailConfirmation;
   @Prop({ required: true, type: String })
   codeConfirmation: string;
   @Prop({ required: true, type: Boolean, default: false })

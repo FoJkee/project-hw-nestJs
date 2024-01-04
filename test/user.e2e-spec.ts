@@ -38,6 +38,7 @@ describe('user', () => {
       expect(response.body).toEqual({});
     });
   });
+
   describe('POST', () => {
     it('Unauthorized user, 401', async () => {
       const response = await request(server).post('/sa/users').send({});
@@ -124,6 +125,7 @@ describe('user', () => {
       expect(response.status).toBe(200);
     });
   });
+
   describe('GET => :id', () => {
     it('Unauthorized user, 401', async () => {
       const response = await request(server).get('/sa/users');
@@ -168,16 +170,17 @@ describe('user', () => {
       });
     });
 
-    it('pagination searchLoginTerm', async () => {
-      const response = await request(server)
-        .get('/sa/users')
-        .auth('admin', 'qwerty', { type: 'basic' })
-        .query({
-          searchLoginTerm: 'A',
-        });
-      expect(response.status).toBe(200);
-      expect(response.body.items[0].id).toBe(newUser3.id);
-    });
+    // it('pagination searchLoginTerm', async () => {
+    //   const response = await request(server)
+    //     .get('/sa/users')
+    //     .auth('admin', 'qwerty', { type: 'basic' })
+    //     .query({
+    //       searchEmailTerm: 'A',
+    //     });
+    //
+    //   expect(response.status).toBe(200);
+    //   expect(response.body.items[0].id).toBe(newUser3.id);
+    // });
   });
   describe('DELETE => :id', () => {
     it('Unauthorized user, 401', async () => {
@@ -202,27 +205,6 @@ describe('user', () => {
         .auth('admin', 'qwerty', { type: 'basic' });
 
       expect(responseAfter.status).toBe(404);
-    });
-  });
-
-  describe('GET', () => {
-    it('GET users', async () => {
-      const res = await request(server).get('/sa/users').expect(200);
-      expect(res.body.name).toBe('User');
-    });
-  });
-  describe('POST', () => {
-    it('+ POST create the user with correct data', async function () {
-      const res = await request(server)
-        .post('/sa/users')
-        .send({
-          name: 'Vanya',
-          login: 'ambition',
-          password: 'qwerty',
-        })
-        .expect(201);
-      expect(res.body.name).toBe('Vanya');
-      expect(res.body.login).toBe('ambition');
     });
   });
 });

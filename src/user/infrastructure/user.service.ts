@@ -38,9 +38,10 @@ export class UserService {
       codeConfirmation: randomUUID(),
       isConfirmed: false,
     };
-    const result = await this.userRepositorySql.createUser(newUser);
+    const result = await this.userRepositorySql.createUser({ ...newUser });
 
     if (!result) throw new BadRequestException();
+
     return newUser;
   }
 
@@ -83,9 +84,15 @@ export class UserService {
 
   async findUserAndUpdateByConfirmationCode(code: string) {
     const user = await this.userRepositorySql.findUserByConfirmationCode(code);
-    console.log('user', user);
-    if (!user) throw new BadRequestException();
-    if (user.emailConfirmation.isConfirmed)
+    if (!user)
+      throw new BadRequestException([
+        {
+          message: 'Code is not exist',
+          field: 'code',
+        },
+      ]);
+
+    if (user.isConfirmed)
       throw new BadRequestException([
         {
           message: 'invalid code',

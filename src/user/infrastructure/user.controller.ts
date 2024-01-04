@@ -42,6 +42,7 @@ export class UserController {
       email: fullUser.email,
       createdAt: fullUser.createdAt,
     };
+    // return await this.userService.createUser(userDto);
   }
   @UseGuards(BasicAuthGuard)
   @Delete('/users/:userId')

@@ -102,29 +102,8 @@ export class AuthController {
       throw new UnauthorizedException();
     }
   }
-
-  // @Post('refresh-token')
-  // @HttpCode(200)
-  // async refreshToken(
-  //   @RefreshToken() token: string,
-  //   @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   try {
-  //     const tokenData = await this.authService.refreshToken(token);
-  //     if (!tokenData) return null;
-  //     const { accessToken, newRefreshToken } = tokenData;
-  //
-  //     res.cookie('refreshToken', newRefreshToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //     });
-  //     return { accessToken: accessToken };
-  //   } catch (e) {
-  //     throw new UnauthorizedException();
-  //   }
-  // }
   @Post('registration')
-  @UseGuards(ThrottlerGuard)
+  // @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async registration(@Body() registrationDto: RegistrationDto) {
     return this.authService.registration(registrationDto);

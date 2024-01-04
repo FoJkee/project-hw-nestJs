@@ -87,7 +87,7 @@ export class TestingUser {
     };
 
     const response = await request(this.server)
-      .post('/users')
+      .post('/sa/users')
       .auth('admin', 'qwerty', { type: 'basic' })
       .send(userData);
 
@@ -109,7 +109,7 @@ export class TestingUser {
     };
 
     const response = await request(this.server)
-      .post('/users')
+      .post('/sa/users')
       .auth('admin', 'qwerty', { type: 'basic' })
       .send(userData1);
 

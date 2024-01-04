@@ -16,6 +16,8 @@ import { NewPasswordDto } from '../dto/newpassword.dto';
 import { UserRepository } from '../../user/infrastructure/user.repository';
 import { DeviceDto } from '../../security-devices/dto/device.dto';
 import { UserRepositorySql } from '../../user/infrastructure/user.repository.sql';
+import { UserEntity } from '../../user/models/user.schema';
+import { tr } from '@faker-js/faker';
 
 @Injectable()
 export class AuthService {
@@ -116,16 +118,24 @@ export class AuthService {
         },
       ]);
 
+    if (userEmail.isConfirmed)
+      throw new NotFoundException([
+        {
+          message: 'email already confirmed',
+          field: 'email',
+        },
+      ]);
+
     const newCodeConfirmation = randomUUID();
 
     const updateUser = await this.userService.updateUserByConfirmationCode(
       userEmail.id,
       newCodeConfirmation,
     );
-    if (!updateUser) throw new BadRequestException();
 
+    if (!updateUser) throw new BadRequestException();
     await this.emailService.sendEmail(
-      userEmail.email,
+      email,
       'Email resending conformation',
       `<h1>Password recovery confirmation</h1>
             <p>To finish password recovery please follow the link below:
@@ -149,7 +159,6 @@ export class AuthService {
 
   async registrationEmailResending(email: string) {
     const userEmail = await this.userRepositorySql.findUserByEmail(email);
-    console.log('userEmail', userEmail);
     if (!userEmail)
       throw new BadRequestException([
         {
@@ -158,13 +167,13 @@ export class AuthService {
         },
       ]);
 
-    // if (userEmail.emailConfirmation.isConfirmed === true)
-    //   throw new BadRequestException([
-    //     {
-    //       message: 'email already confirmed',
-    //       field: 'email',
-    //     },
-    //   ]);
+    if (!userEmail || userEmail.isConfirmed === true)
+      throw new BadRequestException([
+        {
+          message: 'email already confirmed',
+          field: 'email',
+        },
+      ]);
 
     const newCodeConfirmation = randomUUID();
 
@@ -172,22 +181,22 @@ export class AuthService {
       userEmail.id,
       newCodeConfirmation,
     );
-    console.log();
-    console.log('updateUser', updateUser); //[[],1]
 
-    if (!updateUser) throw new BadRequestException();
-
-    console.log(
-      'updateUser.emailConfirmation.codeConfirmation', //@ts-ignore
-      updateUser.codeConfirmation,
-    );
+    // if (updateUser.isConfirmed)
+    //   throw new BadRequestException([
+    //     {
+    //       message: '1234',
+    //       field: '1234',
+    //     },
+    //   ]);
+    console.log('updateUser.codeConfirmation', updateUser.codeConfirmation);
 
     await this.emailService.sendEmail(
       email,
       'Email resending confirmation',
       `<h1>Email resending confirmation</h1>
             <p>To finish email resending please follow the link below:
-             <a href='https://somesite.com/confirm-email?code=${updateUser?.codeConfirmation}'>complete registration</a>
+             <a href='https://somesite.com/confirm-email?code=${updateUser.codeConfirmation}'>complete registration</a>
             </p>`,
     );
 
